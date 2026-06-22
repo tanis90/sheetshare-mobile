@@ -1,0 +1,94 @@
+.sheetshare-mobile-manager {
+  display: grid;
+  gap: 12px;
+}
+
+.sheetshare-mobile-manager p {
+  margin: 0;
+}
+
+.sheetshare-mobile-manager table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sheetshare-mobile-manager th,
+.sheetshare-mobile-manager td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--color-border-light-tertiary, #ccc);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.sheetshare-mobile-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sheetshare-mobile-settings-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 12px;
+  border: 1px solid var(--color-border-light-tertiary, #ccc);
+  border-radius: 6px;
+}
+
+.sheetshare-mobile-settings-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+}
+
+.sheetshare-mobile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sheetshare-mobile-error {
+  color: var(--color-text-dark-danger, #9a1b1b);
+  font-size: 12px;
+}
+
+.sheetshare-mobile-test-result {
+  color: var(--color-text-light-highlight, #6f5415);
+  font-size: 12px;
+}
+
+.sheetshare-mobile-doctor {
+  display: grid;
+  gap: 12px;
+}
+
+.sheetshare-mobile-doctor table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sheetshare-mobile-doctor th,
+.sheetshare-mobile-doctor td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--color-border-light-tertiary, #ccc);
+  text-align: left;
+  vertical-align: top;
+}
+
+.sheetshare-mobile-doctor-ok td:nth-child(2) {
+  color: #1e7f3f;
+  font-weight: 700;
+}
+
+.sheetshare-mobile-doctor-warn td:nth-child(2) {
+  color: #a86422;
+  font-weight: 700;
+}
+
+.sheetshare-mobile-doctor-error td:nth-child(2) {
+  color: #9a1b1b;
+  font-weight: 700;
+}

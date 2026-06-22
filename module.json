@@ -1,0 +1,53 @@
+{
+  "id": "sheetshare-mobile",
+  "title": "SheetShare Mobile",
+  "description": "Mobile-first, password-protected character sheet sharing for Foundry VTT.",
+  "version": "0.1.0",
+  "authors": [
+    {
+      "name": "yangqi"
+    }
+  ],
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13"
+  },
+  "relationships": {
+    "systems": [
+      {
+        "id": "dnd5e",
+        "type": "system",
+        "compatibility": {
+          "minimum": "5.3",
+          "verified": "5.3.5"
+        }
+      }
+    ]
+  },
+  "esmodules": [
+    "scripts/module.js"
+  ],
+  "styles": [
+    "styles/module.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "languages/en.json"
+    },
+    {
+      "lang": "cn",
+      "name": "中文",
+      "path": "languages/zh-cn.json"
+    },
+    {
+      "lang": "zh-cn",
+      "name": "中文（简体）",
+      "path": "languages/zh-cn.json"
+    }
+  ],
+  "url": "",
+  "manifest": "",
+  "download": ""
+}

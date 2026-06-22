@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SheetShare Mobile</title>
+  <link rel="stylesheet" href="assets/app.css">
+  <script defer src="assets/app.js"></script>
+  <script defer src="assets/alpine.min.js"></script>
+</head>
+<body>
+  <main class="app" x-data="characterSheetViewer()" x-init="init()">
+    <header class="topbar">
+      <div class="brand">
+        <h1 x-text="selected ? selected.summary.name : t('brand')">SheetShare Mobile</h1>
+        <p x-text="selected ? selected.summary.classes : worldTitle">Loading</p>
+      </div>
+      <button class="ghost-button" type="button" x-show="selected" x-on:click="showList()" x-text="t('lock')">Lock</button>
+    </header>
+
+    <section class="screen" x-show="error">
+      <div class="empty-state">
+        <strong x-text="t('dataUnavailable')">Data unavailable</strong>
+        <p x-text="error"></p>
+      </div>
+    </section>
+
+    <section class="screen" x-show="needsPassword && !selected && !error">
+      <div class="unlock-card">
+        <h2 x-text="t('enterPasswordTitle')">Enter Share Password</h2>
+        <p x-text="t('passwordHelp')">This mobile sheet is protected.</p>
+        <form x-on:submit.prevent="unlock()">
+          <input class="search" type="password" autocomplete="current-password" :placeholder="t('passwordPlaceholder')" x-model="password">
+          <p class="unlock-error" x-show="unlockError" x-text="unlockError"></p>
+          <button class="primary-button" type="submit" :disabled="unlocking" x-text="unlocking ? t('unlocking') : t('unlockSheet')"></button>
+        </form>
+      </div>
+    </section>
+
+    <section class="screen" x-show="selected && !error">
+      <div class="detail-shell">
+        <aside class="summary-column">
+          <section class="identity">
+            <div class="portrait">
+              <img x-show="selected?.summary.portrait" :src="assetUrl(selected?.summary.portrait)" alt="">
+              <span x-show="!selected?.summary.portrait" x-text="initials(selected?.summary.name)"></span>
+            </div>
+            <div>
+              <h2 x-text="selected?.summary.name"></h2>
+              <p x-text="[selected?.summary.species, selected?.summary.classes].filter(Boolean).join(' / ')"></p>
+              <div class="pill-row">
+                <span class="pill" x-text="formatUpdated(selected?.exportedAt)"></span>
+              </div>
+            </div>
+          </section>
+
+          <section class="stat-grid">
+            <div class="stat-tile"><span>AC</span><strong x-text="selected?.summary.ac || '-'"></strong></div>
+            <div class="stat-tile"><span x-text="t('initiative')">Initiative</span><strong x-text="selected?.summary.initiative || '-'"></strong></div>
+            <div class="stat-tile"><span x-text="t('speed')">Speed</span><strong x-text="selected?.summary.speed || '-'"></strong></div>
+            <div class="stat-tile"><span x-text="t('proficiency')">Proficiency</span><strong x-text="selected?.summary.proficiencyBonus || '-'"></strong></div>
+          </section>
+
+          <section class="hp-panel" :class="'hp-' + (selected?.resources.hp.state || 'healthy')">
+            <div class="hp-line">
+              <strong x-text="t('hp')">Hit Points</strong>
+              <span x-text="`${selected?.resources.hp.value ?? 0} / ${selected?.resources.hp.max ?? 0}`"></span>
+            </div>
+            <div class="hp-track">
+              <div class="hp-fill" :style="`width: ${selected?.resources.hp.pct || 0}%`"></div>
+            </div>
+            <p x-show="selected?.resources.hp.temp" x-text="t('tempHp', { value: selected?.resources.hp.temp })"></p>
+          </section>
+
+          <section class="spell-slot-panel" x-show="selected?.resources.spellSlots.length">
+            <div class="spell-slot-head">
+              <h3 x-text="t('spellSlots')">Spell Slots</h3>
+              <span x-text="spellSlotSummary()"></span>
+            </div>
+            <template x-for="slot in selected?.resources.spellSlots" :key="slot.level">
+              <div class="spell-slot-row">
+                <div class="spell-slot-label">
+                  <strong x-text="spellSlotLabel(slot)"></strong>
+                  <span x-text="`${spellSlotAvailable(slot)} / ${slot.max}`"></span>
+                </div>
+                <div class="spell-slot-cells" :aria-label="t('spellSlotAria', { level: spellSlotLabel(slot), available: spellSlotAvailable(slot), max: slot.max })">
+                  <template x-for="cell in spellSlotCells(slot)" :key="cell.index">
+                    <span class="spell-slot-cell" :class="{ spent: cell.spent }"></span>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </section>
+
+          <section class="special-resource-panel" x-show="specialResources().length">
+            <div class="special-resource-head">
+              <h3 x-text="t('specialResources')">Special Resources</h3>
+              <span x-text="t('itemCount', { count: specialResources().length })"></span>
+            </div>
+            <div class="resource-list">
+              <template x-for="resource in specialResources()" :key="resource.id || resource.name">
+                <div class="resource-card">
+                  <div class="resource-line">
+                    <strong x-text="resource.name"></strong>
+                    <span x-text="`${resourceAvailable(resource)} / ${resourceMax(resource)}`"></span>
+                  </div>
+                  <div class="resource-track" :aria-label="t('resourceAria', { name: resource.name, available: resourceAvailable(resource), max: resourceMax(resource) })">
+                    <div class="resource-fill" :style="`width: ${resourcePct(resource)}%`"></div>
+                  </div>
+                  <p x-show="resourceMeta(resource)" x-text="resourceMeta(resource)"></p>
+                </div>
+              </template>
+            </div>
+          </section>
+        </aside>
+
+        <section class="content-column">
+          <nav class="tabs">
+            <template x-for="tabItem in tabs" :key="tabItem.id">
+              <button class="tab" :class="{ active: tab === tabItem.id }" type="button" x-on:click="tab = tabItem.id" x-text="tabLabel(tabItem)"></button>
+            </template>
+          </nav>
+
+          <section x-show="tab === 'overview'">
+            <div class="panel">
+              <div class="panel-head"><h3 x-text="t('attributes')">Attributes</h3></div>
+              <div class="panel-body ability-grid">
+                <template x-for="ability in selected?.details.abilities" :key="ability.key">
+                  <div class="ability">
+                    <span x-text="ability.label"></span>
+                    <strong x-text="ability.score"></strong>
+                    <small x-text="ability.mod"></small>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <div x-html="listPanelHtml(t('saves'), selected?.details.saves, 'value')"></div>
+            <div x-html="listPanelHtml(t('skills'), selected?.details.skills, 'mod')"></div>
+            <div x-html="traitPanelHtml(t('languages'), selected?.details.traits.languages)"></div>
+            <div x-html="traitPanelHtml(t('senses'), selected?.details.traits.senses)"></div>
+          </section>
+
+          <section x-show="tab === 'spells'">
+            <div class="filters">
+              <input class="search" type="search" :placeholder="t('searchSpells')" x-model.debounce.150ms="spellQuery">
+              <div class="segmented">
+                <button type="button" :class="{ active: spellLevel === 'all' }" x-on:click="spellLevel = 'all'" x-text="t('all')">All</button>
+                <template x-for="level in spellLevels()" :key="level">
+                  <button type="button" :class="{ active: spellLevel === String(level) }" x-on:click="spellLevel = String(level)" x-text="spellLevelLabel(level)"></button>
+                </template>
+              </div>
+            </div>
+            <div x-html="detailsListHtml(filteredSpells(), 'spell')"></div>
+          </section>
+
+          <section x-show="tab === 'actions'">
+            <div x-html="actionGroupsHtml(selected?.sections.actions)"></div>
+          </section>
+
+          <section x-show="tab === 'inventory'">
+            <div class="filters">
+              <input class="search" type="search" :placeholder="t('searchItems')" x-model.debounce.150ms="itemQuery">
+              <div class="segmented">
+                <button type="button" :class="{ active: itemFilter === 'all' }" x-on:click="itemFilter = 'all'" x-text="t('all')">All</button>
+                <button type="button" :class="{ active: itemFilter === 'equipped' }" x-on:click="itemFilter = 'equipped'" x-text="t('equipped')">Equipped</button>
+                <button type="button" :class="{ active: itemFilter === 'consumable' }" x-on:click="itemFilter = 'consumable'" x-text="t('consumable')">Consumables</button>
+                <button type="button" :class="{ active: itemFilter === 'weapon' }" x-on:click="itemFilter = 'weapon'" x-text="t('weapon')">Weapons</button>
+              </div>
+            </div>
+            <div x-html="detailsListHtml(filteredItems(), 'item')"></div>
+          </section>
+
+          <section x-show="tab === 'features'">
+            <div x-html="detailsListHtml(selected?.sections.features, 'feature')"></div>
+          </section>
+        </section>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

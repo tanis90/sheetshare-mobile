@@ -25,6 +25,34 @@ const VIEWER_I18N = {
       inventory: "Inventory",
       features: "Features"
     },
+    abilities: {
+      str: "Strength",
+      dex: "Dexterity",
+      con: "Constitution",
+      int: "Intelligence",
+      wis: "Wisdom",
+      cha: "Charisma"
+    },
+    skillLabels: {
+      acr: "Acrobatics",
+      ani: "Animal Handling",
+      arc: "Arcana",
+      ath: "Athletics",
+      dec: "Deception",
+      his: "History",
+      ins: "Insight",
+      itm: "Intimidation",
+      inv: "Investigation",
+      med: "Medicine",
+      nat: "Nature",
+      prc: "Perception",
+      prf: "Performance",
+      per: "Persuasion",
+      rel: "Religion",
+      slt: "Sleight of Hand",
+      ste: "Stealth",
+      sur: "Survival"
+    },
     ac: "AC",
     initiative: "Initiative",
     speed: "Speed",
@@ -107,6 +135,34 @@ const VIEWER_I18N = {
       inventory: "物品",
       features: "特性"
     },
+    abilities: {
+      str: "力量",
+      dex: "敏捷",
+      con: "体质",
+      int: "智力",
+      wis: "感知",
+      cha: "魅力"
+    },
+    skillLabels: {
+      acr: "特技",
+      ani: "驯兽",
+      arc: "奥秘",
+      ath: "运动",
+      dec: "欺瞒",
+      his: "历史",
+      ins: "洞悉",
+      itm: "威吓",
+      inv: "调查",
+      med: "医疗",
+      nat: "自然",
+      prc: "察觉",
+      prf: "表演",
+      per: "游说",
+      rel: "宗教",
+      slt: "巧手",
+      ste: "隐匿",
+      sur: "求生"
+    },
     ac: "AC",
     initiative: "先攻",
     speed: "速度",
@@ -179,6 +235,27 @@ function lookup(object, path) {
   return String(path).split(".").reduce((current, part) => current?.[part], object);
 }
 
+function localizedLookup(path) {
+  const dictionary = VIEWER_I18N[activeLanguage] || VIEWER_I18N.en;
+  return lookup(dictionary, path) ?? lookup(VIEWER_I18N.en, path);
+}
+
+function localizedAbilityLabel(ability) {
+  const key = String(ability?.key || "").toLowerCase();
+  return key ? (localizedLookup(`abilities.${key}`) || ability.label || key) : (ability?.label || "");
+}
+
+function localizedSkillLabel(skill) {
+  const key = String(skill?.key || "").toLowerCase();
+  return key ? (localizedLookup(`skillLabels.${key}`) || skill.label || key) : (skill?.label || "");
+}
+
+function localizedListLabel(row, labelType) {
+  if (labelType === "ability") return localizedAbilityLabel(row);
+  if (labelType === "skill") return localizedSkillLabel(row);
+  return row?.label || row?.name || row?.key || "";
+}
+
 function resolveInitialLanguage() {
   const params = new URLSearchParams(window.location.search);
   const explicit = params.get("lang");
@@ -241,6 +318,10 @@ window.characterSheetViewer = function characterSheetViewer() {
 
     tabLabel(tab) {
       return this.t(`tabs.${tab.id}`);
+    },
+
+    abilityLabel(ability) {
+      return localizedAbilityLabel(ability);
     },
 
     setLanguage(language) {
@@ -435,17 +516,20 @@ window.characterSheetViewer = function characterSheetViewer() {
       return date.toLocaleDateString(activeLanguage);
     },
 
-    listPanelHtml(title, rows, valueKey) {
+    listPanelHtml(title, rows, valueKey, labelType = "") {
       const safeRows = rows ?? [];
       if (!safeRows.length) return "";
+      const displayRows = labelType === "skill"
+        ? [...safeRows].sort((a, b) => localizedListLabel(a, labelType).localeCompare(localizedListLabel(b, labelType), activeLanguage))
+        : safeRows;
       return `
         <div class="panel">
           <div class="panel-head"><h3>${escapeHtml(title)}</h3></div>
           <div class="panel-body">
             <div class="compact-list">
-              ${safeRows.map(row => `
+              ${displayRows.map(row => `
                 <div class="line-item">
-                  <span class="line-name">${escapeHtml(row.label || row.name || row.key)}</span>
+                  <span class="line-name">${escapeHtml(localizedListLabel(row, labelType))}</span>
                   <span class="line-meta">${escapeHtml(row[valueKey] ?? row.value ?? "")}</span>
                 </div>
               `).join("")}

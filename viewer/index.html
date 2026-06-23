@@ -127,7 +127,7 @@
               <div class="panel-body ability-grid">
                 <template x-for="ability in selected?.details.abilities" :key="ability.key">
                   <div class="ability">
-                    <span x-text="ability.label"></span>
+                    <span x-text="abilityLabel(ability)"></span>
                     <strong x-text="ability.score"></strong>
                     <small x-text="ability.mod"></small>
                   </div>
@@ -135,8 +135,8 @@
               </div>
             </div>
 
-            <div x-html="listPanelHtml(t('saves'), selected?.details.saves, 'value')"></div>
-            <div x-html="listPanelHtml(t('skills'), selected?.details.skills, 'mod')"></div>
+            <div x-html="listPanelHtml(t('saves'), selected?.details.saves, 'value', 'ability')"></div>
+            <div x-html="listPanelHtml(t('skills'), selected?.details.skills, 'mod', 'skill')"></div>
             <div x-html="traitPanelHtml(t('languages'), selected?.details.traits.languages)"></div>
             <div x-html="traitPanelHtml(t('senses'), selected?.details.traits.senses)"></div>
           </section>

@@ -4,7 +4,7 @@
 
 SheetShare Mobile 让 GM 可以从 Foundry 里的 actor 发布一张适合手机阅读的角色卡。玩家打开分享链接，输入整桌分享密码，就能在手机上查看角色卡，不需要登录 Foundry。
 
-![手机角色卡](docs/screenshots/viewer-zh-mobile.png)
+![Wizard 手机角色卡](docs/screenshots/viewer-wizard-mobile.png)
 
 ## 功能
 
@@ -65,7 +65,11 @@ git clone https://github.com/tanis90/sheetshare-mobile.git sheetshare-mobile
 
 玩家成功解锁一次后，同一浏览器会记住这张角色卡。刷新或重新打开链接会自动解锁，直到 GM 用不同密码重新发布。公共设备上请点击 **锁定** 清除已保存密码。
 
-![角色卡入口](docs/screenshots/actor-header-zh.png)
+![DM 发布 Wizard 到手机端](docs/screenshots/dm-publish-flow.png)
+
+玩家在手机上打开链接，输入同一个分享密码后，会看到手机优先的只读角色卡。
+
+![Wizard 手机角色卡](docs/screenshots/viewer-wizard-mobile.png)
 
 ## 设置
 

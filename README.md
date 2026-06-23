@@ -4,7 +4,7 @@ Mobile-first, password-protected character sheet sharing for Foundry VTT.
 
 SheetShare Mobile lets a GM publish a clean mobile character sheet from a Foundry actor. Players open a shared link, enter the table password, and read the sheet on a phone without logging in to Foundry.
 
-![Mobile viewer](docs/screenshots/viewer-en-mobile.png)
+![Wizard mobile viewer](docs/screenshots/viewer-wizard-mobile.png)
 
 ## Features
 
@@ -65,7 +65,11 @@ Published sheets can be refreshed from the actor sheet header or from the manage
 
 After a successful unlock, the player viewer remembers that sheet on the same browser. Refreshing or reopening the link unlocks automatically until the GM republishes with a different password. Use **Lock** on shared devices to clear the saved password.
 
-![Actor sheet controls](docs/screenshots/actor-header-zh.png)
+![DM publishing Wizard to mobile](docs/screenshots/dm-publish-flow.png)
+
+Players open the link on a phone, unlock it with the table password, and get a mobile-first read-only sheet.
+
+![Wizard mobile sheet](docs/screenshots/viewer-wizard-mobile.png)
 
 ## Settings
 

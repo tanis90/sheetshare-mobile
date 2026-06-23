@@ -1,5 +1,7 @@
 # SheetShare Mobile
 
+[中文说明](README-zh.md)
+
 Mobile-first, password-protected character sheet sharing for Foundry VTT.
 
 SheetShare Mobile lets a GM publish a clean mobile character sheet from a Foundry actor. Players open a shared link, enter the table password, and read the sheet on a phone without logging in to Foundry.

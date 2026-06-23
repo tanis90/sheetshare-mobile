@@ -6,7 +6,7 @@ Mobile-first, password-protected character sheet sharing for Foundry VTT.
 
 SheetShare Mobile lets a GM publish a clean mobile character sheet from a Foundry actor. Players open a shared link, enter the table password, and read the sheet on a phone without logging in to Foundry.
 
-![Wizard mobile viewer](docs/screenshots/viewer-wizard-mobile.png)
+![Wizard mobile overview](docs/screenshots/viewer-wizard-overview.png)
 
 ## Features
 
@@ -71,7 +71,17 @@ After a successful unlock, the player viewer remembers that sheet on the same br
 
 Players open the link on a phone, unlock it with the table password, and get a mobile-first read-only sheet.
 
-![Wizard mobile sheet](docs/screenshots/viewer-wizard-mobile.png)
+## Player Sheet Preview
+
+The shared sheet is the main experience: players get a touch-friendly read-only character sheet with quick access to stats, spell slots, resources, spells, actions, and feature references.
+
+| Stats and skills | Spells |
+| --- | --- |
+| ![Wizard stats and skills](docs/screenshots/viewer-wizard-overview-stats.png) | ![Wizard spells](docs/screenshots/viewer-wizard-spells.png) |
+
+| Actions | Features |
+| --- | --- |
+| ![Wizard actions](docs/screenshots/viewer-wizard-actions.png) | ![Wizard features](docs/screenshots/viewer-wizard-features.png) |
 
 ## Settings
 

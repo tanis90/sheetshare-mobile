@@ -4,7 +4,7 @@
 
 SheetShare Mobile 让 GM 可以从 Foundry 里的 actor 发布一张适合手机阅读的角色卡。玩家打开分享链接，输入整桌分享密码，就能在手机上查看角色卡，不需要登录 Foundry。
 
-![Wizard 手机角色卡](docs/screenshots/viewer-wizard-mobile.png)
+![Wizard 手机角色卡总览](docs/screenshots/viewer-wizard-overview.png)
 
 ## 功能
 
@@ -69,7 +69,17 @@ git clone https://github.com/tanis90/sheetshare-mobile.git sheetshare-mobile
 
 玩家在手机上打开链接，输入同一个分享密码后，会看到手机优先的只读角色卡。
 
-![Wizard 手机角色卡](docs/screenshots/viewer-wizard-mobile.png)
+## 玩家角色卡预览
+
+分享出去的角色卡本身就是主要体验：玩家在手机上可以快速查看属性、法术位、资源次数、法术列表、动作和特性索引。
+
+| 属性与技能 | 法术 |
+| --- | --- |
+| ![Wizard 属性与技能](docs/screenshots/viewer-wizard-overview-stats.png) | ![Wizard 法术](docs/screenshots/viewer-wizard-spells.png) |
+
+| 动作 | 特性 |
+| --- | --- |
+| ![Wizard 动作](docs/screenshots/viewer-wizard-actions.png) | ![Wizard 特性](docs/screenshots/viewer-wizard-features.png) |
 
 ## 设置
 

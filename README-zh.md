@@ -12,6 +12,7 @@ SheetShare Mobile 让 GM 可以从 Foundry 里的 actor 发布一张适合手机
 - GM 按角色单独控制发布
 - 带密码保护的静态快照
 - 不公开角色列表
+- 已打开角色卡在玩家设备上记住密码
 - 已发布角色响应 `updateActor` 变化后自动刷新
 - 英文和简体中文 UI
 - Foundry 设置页里的管理面板和 Doctor 检查面板
@@ -62,6 +63,8 @@ git clone https://github.com/YOUR-NAME/sheetshare-mobile.git sheetshare-mobile
 
 已发布角色可以在角色卡标题栏刷新，也可以在管理面板里刷新、复制链接或取消发布。
 
+玩家成功解锁一次后，同一浏览器会记住这张角色卡。刷新或重新打开链接会自动解锁，直到 GM 用不同密码重新发布。公共设备上请点击 **锁定** 清除已保存密码。
+
 ![角色卡入口](docs/screenshots/actor-header-zh.png)
 
 ## 设置
@@ -86,6 +89,8 @@ git clone https://github.com/YOUR-NAME/sheetshare-mobile.git sheetshare-mobile
 ## 安全
 
 每张已发布角色卡都会保存为加密静态快照。密码不会放在 URL 里，也不会由分享页发送给服务器。直接打开 JSON 快照不会看到明文角色卡内容。
+
+为了方便玩家使用，分享页成功解锁后会把密码保存在玩家自己的浏览器本地。点击 **锁定** 会清除这份本地密码；如果 GM 用新密码重新发布，旧密码会自动失效。
 
 公开分享时请使用 HTTPS，避免链接和密码输入页在传输过程中被截获。
 

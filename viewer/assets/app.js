@@ -221,6 +221,8 @@ const VIEWER_I18N = {
   }
 };
 
+const PASSWORD_CACHE_PREFIX = "sheetshare-mobile:v1";
+
 let activeLanguage = resolveInitialLanguage();
 applyDocumentLanguage(activeLanguage);
 
@@ -349,6 +351,7 @@ window.characterSheetViewer = function characterSheetViewer() {
       }
       this.setLanguage(resolveEnvelopeLanguage(this.envelope));
       this.worldTitle = this.t("enterPasswordTitle");
+      await this.tryCachedUnlock();
     },
 
     filteredActors() {
@@ -364,16 +367,8 @@ window.characterSheetViewer = function characterSheetViewer() {
       this.unlocking = true;
       try {
         const snapshot = await decryptEnvelope(this.envelope, this.password);
-        this.selected = snapshot;
-        this.worldTitle = snapshot?.world?.title || this.t("characterSheet");
-        this.needsPassword = false;
-        this.tab = "overview";
-        this.spellQuery = "";
-        this.itemQuery = "";
-        this.spellLevel = "all";
-        this.itemFilter = "all";
-        this.startPolling();
-        window.scrollTo({ top: 0, behavior: "instant" });
+        saveCachedPassword(this.password, this.envelope);
+        this.applySnapshot(snapshot);
       } catch (error) {
         this.unlockError = this.t("wrongPassword");
       } finally {
@@ -381,8 +376,40 @@ window.characterSheetViewer = function characterSheetViewer() {
       }
     },
 
+    async tryCachedUnlock() {
+      const cachedPassword = loadCachedPassword();
+      if (!cachedPassword) return;
+      this.unlocking = true;
+      try {
+        this.password = cachedPassword;
+        const snapshot = await decryptEnvelope(this.envelope, cachedPassword);
+        this.applySnapshot(snapshot);
+      } catch (error) {
+        clearCachedPassword();
+        this.password = "";
+        this.unlockError = this.t("wrongPassword");
+      } finally {
+        this.unlocking = false;
+      }
+    },
+
+    applySnapshot(snapshot) {
+      this.selected = snapshot;
+      this.worldTitle = snapshot?.world?.title || this.t("characterSheet");
+      this.needsPassword = false;
+      this.unlockError = "";
+      this.tab = "overview";
+      this.spellQuery = "";
+      this.itemQuery = "";
+      this.spellLevel = "all";
+      this.itemFilter = "all";
+      this.startPolling();
+      window.scrollTo({ top: 0, behavior: "instant" });
+    },
+
     showList() {
       this.stopPolling();
+      clearCachedPassword();
       this.selected = null;
       this.error = "";
       this.unlockError = "";
@@ -396,7 +423,14 @@ window.characterSheetViewer = function characterSheetViewer() {
       const response = await fetch(`${this.snapshotBase}${slug}.json?ts=${Date.now()}`, { cache: "no-store" });
       if (!response.ok) throw new Error(this.t("readFailed"));
       this.envelope = await response.json();
-      return decryptEnvelope(this.envelope, this.password);
+      try {
+        return await decryptEnvelope(this.envelope, this.password);
+      } catch (error) {
+        const decryptError = new Error("Sheet decrypt failed");
+        decryptError.cause = error;
+        decryptError.sheetshareDecryptFailed = true;
+        throw decryptError;
+      }
     },
 
     startPolling() {
@@ -407,6 +441,15 @@ window.characterSheetViewer = function characterSheetViewer() {
           const next = await this.fetchSnapshot();
           if (!this.selected || next.contentHash !== this.selected.contentHash) this.selected = next;
         } catch (error) {
+          if (error?.sheetshareDecryptFailed) {
+            clearCachedPassword();
+            this.password = "";
+            this.selected = null;
+            this.needsPassword = true;
+            this.unlockError = this.t("wrongPassword");
+            this.stopPolling();
+            return;
+          }
           console.warn("Character sheet refresh failed", error);
         }
       }, 10000);
@@ -794,10 +837,53 @@ function stripHtml(value) {
   return String(value ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
 
-function resolveSnapshotBase() {
+function loadCachedPassword() {
+  try {
+    const raw = window.localStorage?.getItem(passwordCacheKey());
+    if (!raw) return "";
+    const cached = JSON.parse(raw);
+    if (cached?.worldId !== resolveWorldId() || cached?.slug !== resolveSlug()) return "";
+    return typeof cached.password === "string" ? cached.password : "";
+  } catch (error) {
+    return "";
+  }
+}
+
+function saveCachedPassword(password, envelope) {
+  try {
+    window.localStorage?.setItem(passwordCacheKey(), JSON.stringify({
+      worldId: resolveWorldId(),
+      slug: resolveSlug(),
+      updatedAt: envelope?.updatedAt || "",
+      password,
+      savedAt: new Date().toISOString()
+    }));
+  } catch (error) {
+    // Some mobile browsers disable localStorage in private mode. Sharing still works without caching.
+  }
+}
+
+function clearCachedPassword() {
+  try {
+    window.localStorage?.removeItem(passwordCacheKey());
+  } catch (error) {
+    // Best-effort cleanup only.
+  }
+}
+
+function passwordCacheKey() {
+  return `${PASSWORD_CACHE_PREFIX}:${encodeURIComponent(resolveWorldId())}:${resolveSlug()}`;
+}
+
+function resolveWorldId() {
   const params = new URLSearchParams(window.location.search);
   const world = params.get("world");
   if (!world) throw new Error(t("missingWorld"));
+  return world;
+}
+
+function resolveSnapshotBase() {
+  const world = resolveWorldId();
   const prefix = routePrefix();
   return `${prefix}/assets/sheetshare-mobile/${encodeURIComponent(world)}/`;
 }

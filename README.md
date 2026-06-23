@@ -12,6 +12,7 @@ SheetShare Mobile lets a GM publish a clean mobile character sheet from a Foundr
 - GM-controlled publishing per character
 - Password-protected static snapshots
 - No public character index
+- Device-local password memory for opened sheets
 - Auto-refresh after published actors receive `updateActor` changes
 - English and Simplified Chinese UI
 - Manager and Doctor panels in Foundry settings
@@ -62,6 +63,8 @@ Then enable **SheetShare Mobile** in the world module list.
 
 Published sheets can be refreshed from the actor sheet header or from the manager panel.
 
+After a successful unlock, the player viewer remembers that sheet on the same browser. Refreshing or reopening the link unlocks automatically until the GM republishes with a different password. Use **Lock** on shared devices to clear the saved password.
+
 ![Actor sheet controls](docs/screenshots/actor-header-zh.png)
 
 ## Settings
@@ -86,6 +89,8 @@ The settings page also exposes:
 ## Security
 
 Each published character sheet is stored as an encrypted static snapshot. The password is not placed in the URL and is not sent to the server by the viewer. Directly opening the JSON snapshot does not reveal the character sheet.
+
+For convenience, the viewer can remember the password locally on the player's device after a successful unlock. This local password is cleared by **Lock**, and it stops working if the GM republishes with a different password.
 
 Use HTTPS for public sharing so the link and password entry page are protected in transit.
 

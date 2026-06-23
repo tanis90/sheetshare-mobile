@@ -75,8 +75,6 @@ git clone https://github.com/tanis90/sheetshare-mobile.git sheetshare-mobile
 
 打开 **游戏设置 > 配置设置 > SheetShare Mobile**。
 
-![设置](docs/screenshots/settings-zh.png)
-
 可用设置：
 
 - **Actor 更新时自动刷新**：开启后，只要 GM 浏览器当前会话里有分享密码，已发布角色在 `updateActor` 变化后会自动刷新手机角色卡。
@@ -87,8 +85,6 @@ git clone https://github.com/tanis90/sheetshare-mobile.git sheetshare-mobile
 
 - **已发布角色卡**：管理已发布角色，复制链接、刷新或取消发布。
 - **Doctor 检查**：检查存储、分享页资源、访问协议和常见配置问题。
-
-![Doctor](docs/screenshots/doctor-zh.png)
 
 ## 安全
 

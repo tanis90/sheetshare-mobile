@@ -75,8 +75,6 @@ Players open the link on a phone, unlock it with the table password, and get a m
 
 Open **Game Settings > Configure Settings > SheetShare Mobile**.
 
-![Settings](docs/screenshots/settings-zh.png)
-
 Available settings:
 
 - **Auto-refresh on actor updates**: refreshes published sheets after `updateActor` changes while a GM browser has the share password in memory.
@@ -87,8 +85,6 @@ The settings page also exposes:
 
 - **Published Sheets**: manage published characters, copy links, refresh, or unpublish.
 - **Doctor**: check storage, viewer assets, protocol, and common setup problems.
-
-![Doctor](docs/screenshots/doctor-zh.png)
 
 ## Security
 

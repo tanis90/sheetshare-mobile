@@ -114,6 +114,10 @@ The actor content language is controlled by the GM's Foundry world data and inst
 - If links still show an old UI after updating the module, reload the browser and restart Foundry.
 - If you previously used `cn5e-sheet-export`, disable it to avoid duplicate sheet controls.
 
+## Maintainers
+
+Release instructions are in [docs/RELEASE.md](docs/RELEASE.md).
+
 ## Current Scope
 
 The first public target focuses on the common single-GM workflow. `updateActor` auto-refresh is supported. Dedicated hooks for item, spell preparation, and active effect mutations are tracked as follow-up work after wider system testing.

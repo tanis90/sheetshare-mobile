@@ -5,7 +5,8 @@
   "version": "0.1.0",
   "authors": [
     {
-      "name": "yangqi"
+      "name": "tanis90",
+      "url": "https://github.com/tanis90"
     }
   ],
   "compatibility": {
@@ -47,7 +48,7 @@
       "path": "languages/zh-cn.json"
     }
   ],
-  "url": "",
-  "manifest": "",
-  "download": ""
+  "url": "https://github.com/tanis90/sheetshare-mobile",
+  "manifest": "https://github.com/tanis90/sheetshare-mobile/releases/latest/download/module.json",
+  "download": "https://github.com/tanis90/sheetshare-mobile/releases/download/v0.1.0/sheetshare-mobile.zip"
 }

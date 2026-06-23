@@ -48,7 +48,7 @@ SheetShare Mobile 让 GM 可以从 Foundry 里的 actor 发布一张适合手机
 
 ```powershell
 cd D:\FVTT_DATA\Data\modules
-git clone https://github.com/YOUR-NAME/sheetshare-mobile.git sheetshare-mobile
+git clone https://github.com/tanis90/sheetshare-mobile.git sheetshare-mobile
 ```
 
 然后在世界的模块列表里启用 **SheetShare Mobile**。

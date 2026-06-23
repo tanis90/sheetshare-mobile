@@ -48,7 +48,7 @@ Clone this repository into your Foundry modules directory:
 
 ```powershell
 cd D:\FVTT_DATA\Data\modules
-git clone https://github.com/YOUR-NAME/sheetshare-mobile.git sheetshare-mobile
+git clone https://github.com/tanis90/sheetshare-mobile.git sheetshare-mobile
 ```
 
 Then enable **SheetShare Mobile** in the world module list.

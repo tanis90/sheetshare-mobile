@@ -401,13 +401,31 @@ function buildSkills(skills = {}, abilities = {}) {
 
 function buildTraits(traits = {}) {
   return {
-    languages: splitTraitList(formatTraitList(traits.languages, CONFIG.DND5E?.languages)),
+    languages: splitTraitList(formatTraitLabels(traits.languages, "languages", CONFIG.DND5E?.languages)),
     senses: splitTraitList(formatSenses(traits.senses)),
     damageResistances: splitTraitList(formatTraitList(traits.dr, CONFIG.DND5E?.damageTypes)),
     damageImmunities: splitTraitList(formatTraitList(traits.di, CONFIG.DND5E?.damageTypes)),
     damageVulnerabilities: splitTraitList(formatTraitList(traits.dv, CONFIG.DND5E?.damageTypes)),
     conditionImmunities: splitTraitList(formatTraitList(traits.ci, CONFIG.DND5E?.conditionTypes))
   };
+}
+
+function formatTraitLabels(trait, labelKey, dictionary = null) {
+  const labels = trait?.labels?.[labelKey];
+  if (Array.isArray(labels) && labels.length) {
+    const values = [
+      ...labels.map(label => String(label || "").trim()).filter(Boolean),
+      ...customTraitLabels(trait)
+    ];
+    return [...new Set(values)].join(", ") || "—";
+  }
+  return formatTraitList(trait, dictionary);
+}
+
+function customTraitLabels(trait = {}) {
+  if (Array.isArray(trait.custom)) return trait.custom.map(label => String(label || "").trim()).filter(Boolean);
+  if (typeof trait.custom === "string") return trait.custom.split(/[;,]/).map(label => label.trim()).filter(Boolean);
+  return [];
 }
 
 function buildProficiencies(traits = {}) {

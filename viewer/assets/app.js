@@ -54,34 +54,6 @@ const VIEWER_I18N = {
       ste: "Stealth",
       sur: "Survival"
     },
-    languageLabels: {
-      aarakocra: "Aarakocra",
-      abyssal: "Abyssal",
-      aquan: "Aquan",
-      auran: "Auran",
-      cant: "Thieves' Cant",
-      celestial: "Celestial",
-      common: "Common",
-      deep: "Deep Speech",
-      "deep speech": "Deep Speech",
-      draconic: "Draconic",
-      druidic: "Druidic",
-      dwarvish: "Dwarvish",
-      elvish: "Elvish",
-      giant: "Giant",
-      gnoll: "Gnoll",
-      gnomish: "Gnomish",
-      goblin: "Goblin",
-      halfling: "Halfling",
-      ignan: "Ignan",
-      infernal: "Infernal",
-      orc: "Orc",
-      primordial: "Primordial",
-      sign: "Sign Language",
-      sylvan: "Sylvan",
-      terran: "Terran",
-      undercommon: "Undercommon"
-    },
     ac: "AC",
     initiative: "Initiative",
     speed: "Speed",
@@ -198,34 +170,6 @@ const VIEWER_I18N = {
       ste: "隐匿",
       sur: "求生"
     },
-    languageLabels: {
-      aarakocra: "鹰身人语",
-      abyssal: "深渊语",
-      aquan: "水族语",
-      auran: "风族语",
-      cant: "盗贼黑话",
-      celestial: "天界语",
-      common: "通用语",
-      deep: "深层语",
-      "deep speech": "深层语",
-      draconic: "龙语",
-      druidic: "德鲁伊语",
-      dwarvish: "矮人语",
-      elvish: "精灵语",
-      giant: "巨人语",
-      gnoll: "豺狼人语",
-      gnomish: "侏儒语",
-      goblin: "地精语",
-      halfling: "半身人语",
-      ignan: "火族语",
-      infernal: "炼狱语",
-      orc: "兽人语",
-      primordial: "原初语",
-      sign: "手语",
-      sylvan: "木族语",
-      terran: "土族语",
-      undercommon: "地下通用语"
-    },
     ac: "AC",
     initiative: "先攻",
     speed: "速度",
@@ -326,22 +270,6 @@ function localizedListLabel(row, labelType) {
   if (labelType === "ability") return localizedAbilityLabel(row);
   if (labelType === "skill") return localizedSkillLabel(row);
   return row?.label || row?.name || row?.key || "";
-}
-
-function localizedTraitLabel(value, labelType) {
-  const text = String(value || "").trim();
-  if (!text) return "";
-  if (labelType !== "language") return text;
-  const key = normalizeTraitLookupKey(text);
-  return localizedLookup(`languageLabels.${key}`) || text;
-}
-
-function normalizeTraitLookupKey(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/^languages?\./, "")
-    .replace(/\s+/g, " ");
 }
 
 function resolveInitialLanguage() {
@@ -691,14 +619,14 @@ window.characterSheetViewer = function characterSheetViewer() {
       `;
     },
 
-    traitPanelHtml(title, items, labelType = "") {
+    traitPanelHtml(title, items) {
       const safeItems = items ?? [];
       if (!safeItems.length) return "";
       return `
         <div class="panel">
           <div class="panel-head"><h3>${escapeHtml(title)}</h3></div>
           <div class="panel-body">
-            <div class="pill-row">${safeItems.map(item => `<span class="pill">${escapeHtml(localizedTraitLabel(item, labelType))}</span>`).join("")}</div>
+            <div class="pill-row">${safeItems.map(item => `<span class="pill">${escapeHtml(item)}</span>`).join("")}</div>
           </div>
         </div>
       `;

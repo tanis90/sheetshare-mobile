@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SheetShare Mobile</title>
   <link rel="stylesheet" href="assets/app.css">
-  <script defer src="assets/app.js?v=0.1.0-localized-traits"></script>
+  <script defer src="assets/app.js?v=0.1.0-foundry-trait-labels"></script>
   <script defer src="assets/alpine.min.js"></script>
 </head>
 <body>
@@ -152,7 +152,7 @@
 
             <div x-html="listPanelHtml(t('saves'), selected?.details.saves, 'value', 'ability')"></div>
             <div x-html="listPanelHtml(t('skills'), selected?.details.skills, 'mod', 'skill')"></div>
-            <div x-html="traitPanelHtml(t('languages'), selected?.details.traits.languages, 'language')"></div>
+            <div x-html="traitPanelHtml(t('languages'), selected?.details.traits.languages)"></div>
             <div x-html="traitPanelHtml(t('senses'), selected?.details.traits.senses)"></div>
           </section>
 

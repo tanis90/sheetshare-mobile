@@ -351,6 +351,12 @@ img {
   line-height: 1.1;
 }
 
+.stat-tile-long strong {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.18;
+}
+
 .hp-panel,
 .spell-slot-panel,
 .special-resource-panel,

@@ -28,6 +28,7 @@ export async function extractCharacterSnapshot(actor) {
   const traits = system.traits ?? {};
   const items = getActorItems(actor);
   const translations = await loadCnTranslations();
+  const builtTraits = buildTraits(traits);
 
   const snapshot = {
     schema: SNAPSHOT_SCHEMA,
@@ -65,6 +66,7 @@ export async function extractCharacterSnapshot(actor) {
       attackBonus: resolvePrimaryAttackBonus(items, attributes, abilities),
       spellAttackBonus: resolveSpellAttackBonus(attributes),
       spellSaveDc: attributes.spell?.dc ?? "",
+      resistances: summarizeTraitItems(builtTraits.damageResistances),
       passivePerception: resolvePassivePerception(system.skills, abilities),
       spellcastingAbility: localizeAbility(attributes.spellcasting)
     },
@@ -83,7 +85,7 @@ export async function extractCharacterSnapshot(actor) {
       abilities: buildAbilities(abilities, attributes.prof),
       saves: buildSaves(abilities, attributes.prof),
       skills: buildSkills(system.skills, abilities),
-      traits: buildTraits(traits),
+      traits: builtTraits,
       proficiencies: buildProficiencies(traits)
     },
     sections: {
@@ -426,6 +428,13 @@ function customTraitLabels(trait = {}) {
   if (Array.isArray(trait.custom)) return trait.custom.map(label => String(label || "").trim()).filter(Boolean);
   if (typeof trait.custom === "string") return trait.custom.split(/[;,]/).map(label => label.trim()).filter(Boolean);
   return [];
+}
+
+function summarizeTraitItems(items = []) {
+  const values = items.map(item => String(item || "").trim()).filter(Boolean);
+  if (!values.length) return "";
+  if (values.length <= 2) return values.join(" / ");
+  return `${values.slice(0, 2).join(" / ")} +${values.length - 2}`;
 }
 
 function buildProficiencies(traits = {}) {

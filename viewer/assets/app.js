@@ -16,6 +16,7 @@ const VIEWER_I18N = {
     characterSheet: "Character Sheet",
     wrongPassword: "Wrong password, or this sheet was republished with a new password.",
     readFailed: "Unable to read the sheet.",
+    externalAuthFormatMismatch: "This link expects an externally protected sheet. Ask the GM to refresh the published sheet.",
     missingWorld: "The link is missing a world parameter. Ask the GM to copy the share link again.",
     missingSlug: "The link is missing a valid sheet parameter.",
     tabs: {
@@ -126,6 +127,7 @@ const VIEWER_I18N = {
     characterSheet: "角色卡",
     wrongPassword: "密码错误，或角色卡已用新密码重新发布。",
     readFailed: "无法读取角色卡。",
+    externalAuthFormatMismatch: "这个链接需要外部认证模式的角色卡。请让 GM 刷新已发布角色卡。",
     missingWorld: "链接缺少 world 参数。请让 GM 重新复制分享链接。",
     missingSlug: "链接缺少有效的角色卡参数。",
     tabs: {
@@ -222,6 +224,8 @@ const VIEWER_I18N = {
 };
 
 const PASSWORD_CACHE_PREFIX = "sheetshare-mobile:v1";
+const ENCRYPTED_SNAPSHOT_SCHEMA = "sheetshare-mobile.encrypted-snapshot.v1";
+const TRUSTED_SNAPSHOT_SCHEMA = "sheetshare-mobile.trusted-snapshot.v1";
 
 let activeLanguage = resolveInitialLanguage();
 applyDocumentLanguage(activeLanguage);
@@ -297,6 +301,7 @@ window.characterSheetViewer = function characterSheetViewer() {
     unlockError: "",
     password: "",
     needsPassword: true,
+    externalAuth: resolveViewerMode() === "external",
     unlocking: false,
     listQuery: "",
     spellQuery: "",
@@ -346,7 +351,15 @@ window.characterSheetViewer = function characterSheetViewer() {
       const response = await fetch(`${this.snapshotBase}${slug}.json?ts=${Date.now()}`, { cache: "no-store" });
       if (!response.ok) throw new Error(this.t("fetchMissing"));
       this.envelope = await response.json();
-      if (this.envelope?.schema !== "sheetshare-mobile.encrypted-snapshot.v1") {
+      if (this.externalAuth) {
+        if (this.envelope?.schema !== TRUSTED_SNAPSHOT_SCHEMA) {
+          throw new Error(this.t("externalAuthFormatMismatch"));
+        }
+        this.setLanguage(resolveEnvelopeLanguage(this.envelope));
+        this.applySnapshot(this.envelope);
+        return;
+      }
+      if (this.envelope?.schema !== ENCRYPTED_SNAPSHOT_SCHEMA) {
         throw new Error(this.t("unsupportedFormat"));
       }
       this.setLanguage(resolveEnvelopeLanguage(this.envelope));
@@ -413,7 +426,7 @@ window.characterSheetViewer = function characterSheetViewer() {
       this.selected = null;
       this.error = "";
       this.unlockError = "";
-      this.needsPassword = true;
+      this.needsPassword = !this.externalAuth;
       this.password = "";
       window.scrollTo({ top: 0, behavior: "instant" });
     },
@@ -423,6 +436,10 @@ window.characterSheetViewer = function characterSheetViewer() {
       const response = await fetch(`${this.snapshotBase}${slug}.json?ts=${Date.now()}`, { cache: "no-store" });
       if (!response.ok) throw new Error(this.t("readFailed"));
       this.envelope = await response.json();
+      if (this.externalAuth) {
+        if (this.envelope?.schema !== TRUSTED_SNAPSHOT_SCHEMA) throw new Error(this.t("externalAuthFormatMismatch"));
+        return this.envelope;
+      }
       try {
         return await decryptEnvelope(this.envelope, this.password);
       } catch (error) {
@@ -893,6 +910,11 @@ function resolveSlug() {
   const slug = params.get("s");
   if (!slug || !/^[a-f0-9]{16,64}$/i.test(slug)) throw new Error(t("missingSlug"));
   return slug;
+}
+
+function resolveViewerMode() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("mode") === "external" ? "external" : "password";
 }
 
 function routePrefix() {

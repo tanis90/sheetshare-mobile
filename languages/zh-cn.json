@@ -24,10 +24,16 @@
       "ViewerLanguageAuto": "自动：使用玩家浏览器语言",
       "ViewerLanguageFoundry": "使用当前 Foundry 世界语言",
       "ViewerLanguageEnglish": "English",
-      "ViewerLanguageChinese": "中文（简体）"
+      "ViewerLanguageChinese": "中文（简体）",
+      "AccessModeName": "访问模式",
+      "AccessModeHint": "密码模式是安全默认值。External Auth 会写出 trusted 明文快照，只应在分享页和 assets 已经由反向代理或门户认证保护时使用。",
+      "AccessModePassword": "密码保护的加密快照",
+      "AccessModeExternal": "External Auth / 受信门户"
     },
     "Manager": {
-      "Intro": "已发布角色卡是由 Foundry 现有网页服务器提供的加密静态快照。",
+      "Intro": "已发布角色卡是由 Foundry 现有网页服务器提供的静态快照。",
+      "IntroPassword": "当前访问模式：密码保护的加密快照。",
+      "IntroExternal": "当前访问模式：External Auth。Trusted 快照必须只通过门户或反向代理认证后访问。",
       "Character": "角色",
       "Visibility": "可见性",
       "Status": "状态",
@@ -55,6 +61,7 @@
       "Protocol": "访问协议",
       "PublishedActors": "已发布角色",
       "LegacyModule": "旧模块",
+      "AccessMode": "访问模式",
       "StorageReadWrite": "存储写入/读取",
       "ViewerAssets": "分享页资源",
       "Https": "HTTPS",
@@ -62,6 +69,8 @@
       "PublishedCount": "已发布 {count} 个",
       "LegacyActive": "cn5e-sheet-export 也处于启用状态。",
       "LegacyInactive": "旧的 sheet export 模块未启用。",
+      "AccessModePassword": "密码保护的加密快照。",
+      "AccessModeExternal": "External Auth 已启用。公开分享前请确认 /modules/sheetshare-mobile/viewer 和 /assets/sheetshare-mobile 已受认证保护。",
       "Readable": "可读取：{url}",
       "HttpStatus": "HTTP {status}：{url}"
     }

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SheetShare Mobile</title>
   <link rel="stylesheet" href="assets/app.css">
-  <script defer src="assets/app.js"></script>
+  <script defer src="assets/app.js?v=0.1.0-external-auth"></script>
   <script defer src="assets/alpine.min.js"></script>
 </head>
 <body>
@@ -15,7 +15,7 @@
         <h1 x-text="selected ? selected.summary.name : t('brand')">SheetShare Mobile</h1>
         <p x-text="selected ? selected.summary.classes : worldTitle">Loading</p>
       </div>
-      <button class="ghost-button" type="button" x-show="selected" x-on:click="showList()" x-text="t('lock')">Lock</button>
+      <button class="ghost-button" type="button" x-show="selected && needsPassword" x-on:click="showList()" x-text="t('lock')">Lock</button>
     </header>
 
     <section class="screen" x-show="error">

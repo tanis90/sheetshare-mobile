@@ -2,7 +2,7 @@
 
 [中文说明](README-zh.md)
 
-Mobile-first, password-protected character sheet sharing for Foundry VTT.
+Mobile-first character sheet sharing for Foundry VTT. The default mode uses password-protected encrypted snapshots; trusted portal deployments can opt into External Auth.
 
 SheetShare Mobile lets a GM publish a clean mobile character sheet from a Foundry actor. Players open a shared link, enter the table password, and read the sheet on a phone without logging in to Foundry.
 
@@ -12,7 +12,8 @@ SheetShare Mobile lets a GM publish a clean mobile character sheet from a Foundr
 
 - Mobile-first D&D 5e character sheet viewer
 - GM-controlled publishing per character
-- Password-protected static snapshots
+- Password-protected encrypted static snapshots by default
+- Optional External Auth mode for reverse-proxy or portal-protected deployments
 - No public character index
 - Device-local password memory for opened sheets
 - Auto-refresh after published actors receive `updateActor` changes
@@ -71,6 +72,8 @@ After a successful unlock, the player viewer remembers that sheet on the same br
 
 Players open the link on a phone, unlock it with the table password, and get a mobile-first read-only sheet.
 
+If your site already protects the viewer and snapshot assets behind a portal or reverse proxy, switch **Access mode** to **External Auth / trusted portal**. In that mode the GM publishes trusted snapshots and players do not enter a SheetShare password.
+
 ## Player Sheet Preview
 
 The shared sheet is the main experience: players get a touch-friendly read-only character sheet with quick access to stats, spell slots, resources, spells, actions, and feature references.
@@ -92,6 +95,7 @@ Available settings:
 - **Auto-refresh on actor updates**: refreshes published sheets after `updateActor` changes while a GM browser has the share password in memory.
 - **Warn when sharing over HTTP**: shows a Doctor warning when the current Foundry page is not using HTTPS.
 - **Viewer language**: choose browser auto-detection, the Foundry world language, English, or Simplified Chinese.
+- **Access mode**: use password-protected encrypted snapshots, or External Auth for deployments where `/modules/sheetshare-mobile/viewer` and `/assets/sheetshare-mobile` are already protected by your portal or reverse proxy.
 
 The settings page also exposes:
 
@@ -105,6 +109,8 @@ Each published character sheet is stored as an encrypted static snapshot. The pa
 For convenience, the viewer can remember the password locally on the player's device after a successful unlock. This local password is cleared by **Lock**, and it stops working if the GM republishes with a different password.
 
 Use HTTPS for public sharing so the link and password entry page are protected in transit.
+
+External Auth mode writes trusted readable snapshots. Only enable it when an outer authentication layer protects both the viewer and `Data/assets/sheetshare-mobile`; otherwise anyone who can fetch the JSON can read the published sheet.
 
 ## Language
 

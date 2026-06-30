@@ -6,10 +6,13 @@ export const STORAGE_ROOT_NAME = "sheetshare-mobile";
 const AUTO_EXPORT_SETTING = "autoExportOnActorUpdate";
 const HTTP_WARNING_SETTING = "showHttpWarning";
 const VIEWER_LANGUAGE_SETTING = "viewerLanguage";
+const ACCESS_MODE_SETTING = "accessMode";
 const SESSION_PASSWORD_KEY = "__sheetshareMobilePassword";
 const PUBLISH_FLAG = "publish";
 const VIEWER_LANGUAGE_AUTO = "auto";
 const VIEWER_LANGUAGE_FOUNDRY = "foundry";
+const ACCESS_MODE_PASSWORD = "password";
+const ACCESS_MODE_EXTERNAL = "externalAuth";
 const pendingExports = new Map();
 const lastHashes = new Map();
 let settingsRegistered = false;
@@ -49,6 +52,19 @@ export function registerSnapshotSettings() {
       [VIEWER_LANGUAGE_FOUNDRY]: "SSM.Settings.ViewerLanguageFoundry",
       en: "SSM.Settings.ViewerLanguageEnglish",
       "zh-CN": "SSM.Settings.ViewerLanguageChinese"
+    }
+  });
+
+  game.settings.register(MODULE_ID, ACCESS_MODE_SETTING, {
+    name: "SSM.Settings.AccessModeName",
+    hint: "SSM.Settings.AccessModeHint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: ACCESS_MODE_PASSWORD,
+    choices: {
+      [ACCESS_MODE_PASSWORD]: "SSM.Settings.AccessModePassword",
+      [ACCESS_MODE_EXTERNAL]: "SSM.Settings.AccessModeExternal"
     }
   });
 
@@ -119,12 +135,16 @@ export async function exportActorSnapshot(actor, { reason = "manual", password =
   if (!isPublishedCharacterActor(actor)) throw new Error(game.i18n.localize("SSM.Notifications.NotPublished"));
 
   const publish = getPublishData(actor);
-  if (password) window[SESSION_PASSWORD_KEY] = password;
-  const promptIfMissing = reason === "manual";
-  const sharePassword = password || await getSessionPassword({ promptIfMissing });
-  if (!sharePassword) {
-    if (promptIfMissing) throw new Error(game.i18n.localize("SSM.Notifications.PasswordRequired"));
-    return null;
+  const accessMode = sheetAccessMode();
+  let sharePassword = "";
+  if (accessMode === ACCESS_MODE_PASSWORD) {
+    if (password) window[SESSION_PASSWORD_KEY] = password;
+    const promptIfMissing = reason === "manual";
+    sharePassword = password || await getSessionPassword({ promptIfMissing });
+    if (!sharePassword) {
+      if (promptIfMissing) throw new Error(game.i18n.localize("SSM.Notifications.PasswordRequired"));
+      return null;
+    }
   }
 
   await ensureExportDirectories();
@@ -133,18 +153,21 @@ export async function exportActorSnapshot(actor, { reason = "manual", password =
   const lastHash = lastHashes.get(actor.id);
   if (lastHash === snapshot.contentHash && reason !== "manual") return snapshot;
 
-  const encrypted = await encryptSnapshot(snapshot, sharePassword, publish.slug);
-  await uploadJson(storageRoot(), `${publish.slug}.json`, encrypted);
+  const exported = accessMode === ACCESS_MODE_EXTERNAL
+    ? trustedSnapshot(snapshot, publish.slug)
+    : await encryptSnapshot(snapshot, sharePassword, publish.slug);
+  await uploadJson(storageRoot(), `${publish.slug}.json`, exported);
   lastHashes.set(actor.id, snapshot.contentHash);
 
   await actor.setFlag(MODULE_ID, PUBLISH_FLAG, {
     ...publish,
     enabled: true,
     slug: publish.slug,
-    lastExportedAt: encrypted.updatedAt,
+    lastExportedAt: exported.updatedAt,
     lastExportStatus: "ok",
     lastExportError: "",
-    contentHash: snapshot.contentHash
+    contentHash: snapshot.contentHash,
+    accessMode
   });
 
   return snapshot;
@@ -169,6 +192,7 @@ export function getActorShareUrl(actor) {
   const url = new URL(route(`modules/${MODULE_ID}/viewer/index.html`), window.location.origin);
   url.searchParams.set("world", game.world.id);
   url.searchParams.set("s", publish.slug);
+  if (sheetAccessMode() === ACCESS_MODE_EXTERNAL) url.searchParams.set("mode", "external");
   const lang = shareUrlLanguage();
   if (lang) url.searchParams.set("lang", lang);
   return url.href;
@@ -346,6 +370,26 @@ function storageRoot() {
   return `assets/${STORAGE_ROOT_NAME}/${game.world.id}`;
 }
 
+function trustedSnapshot(snapshot, slug) {
+  return {
+    ...snapshot,
+    schema: "sheetshare-mobile.trusted-snapshot.v1",
+    moduleVersion: game.modules.get(MODULE_ID)?.version || "0.1.0",
+    worldId: game.world.id,
+    slug,
+    updatedAt: new Date().toISOString(),
+    access: {
+      mode: ACCESS_MODE_EXTERNAL,
+      warning: "This trusted snapshot must be served only behind external authentication."
+    },
+    language: {
+      mode: viewerLanguageMode(),
+      foundry: normalizeViewerLanguage(game.i18n?.lang),
+      url: shareUrlLanguage()
+    }
+  };
+}
+
 function route(path) {
   const cleaned = String(path).replace(/^\/+/, "");
   if (foundry.utils.getRoute) return foundry.utils.getRoute(cleaned);
@@ -360,10 +404,19 @@ function viewerLanguageMode() {
   }
 }
 
+function sheetAccessMode() {
+  try {
+    return game.settings.get(MODULE_ID, ACCESS_MODE_SETTING) === ACCESS_MODE_EXTERNAL
+      ? ACCESS_MODE_EXTERNAL
+      : ACCESS_MODE_PASSWORD;
+  } catch {
+    return ACCESS_MODE_PASSWORD;
+  }
+}
+
 function shareUrlLanguage() {
   const mode = viewerLanguageMode();
-  if (mode === VIEWER_LANGUAGE_AUTO) return "";
-  if (mode === VIEWER_LANGUAGE_FOUNDRY) return normalizeViewerLanguage(game.i18n?.lang);
+  if (mode === VIEWER_LANGUAGE_AUTO || mode === VIEWER_LANGUAGE_FOUNDRY) return "";
   return normalizeViewerLanguage(mode);
 }
 
@@ -443,7 +496,9 @@ function findSheetShareSettingsPane(root) {
     || text.includes("Warn when sharing over HTTP")
     || text.includes("HTTP 分享警告")
     || text.includes("Viewer language")
-    || text.includes("分享页语言");
+    || text.includes("分享页语言")
+    || text.includes("Access mode")
+    || text.includes("访问模式");
   return hasSheetShareSettings ? pane : null;
 }
 
@@ -454,7 +509,9 @@ function findSettingsAnchor(root) {
     return text.includes("Auto-refresh on actor updates")
       || text.includes("Actor 更新时自动刷新")
       || text.includes("Warn when sharing over HTTP")
-      || text.includes("HTTP 分享警告");
+      || text.includes("HTTP 分享警告")
+      || text.includes("Access mode")
+      || text.includes("访问模式");
   });
   return marker?.closest(".form-group") || marker;
 }
@@ -506,6 +563,7 @@ class PublishedSheetsApp extends Application {
     const content = `
       <section class="sheetshare-mobile-manager">
         <p>${escapeHtml(game.i18n.localize("SSM.Manager.Intro"))}</p>
+        <p>${escapeHtml(game.i18n.localize(sheetAccessMode() === ACCESS_MODE_EXTERNAL ? "SSM.Manager.IntroExternal" : "SSM.Manager.IntroPassword"))}</p>
         <table>
           <thead>
             <tr>
@@ -641,6 +699,7 @@ async function runDoctorChecks() {
 function buildStaticDoctorRows() {
   const oldModuleActive = Boolean(game.modules.get("cn5e-sheet-export")?.active);
   const publishedActors = getPublishedActors();
+  const accessMode = sheetAccessMode();
   return [
     {
       name: game.i18n.localize("SSM.Doctor.ModuleActive"),
@@ -658,6 +717,11 @@ function buildStaticDoctorRows() {
       detail: window.location.protocol === "https:"
         ? game.i18n.localize("SSM.Doctor.Https")
         : game.i18n.localize("SSM.Doctor.HttpWarning")
+    },
+    {
+      name: game.i18n.localize("SSM.Doctor.AccessMode"),
+      status: accessMode === ACCESS_MODE_EXTERNAL ? "warn" : "ok",
+      detail: game.i18n.localize(accessMode === ACCESS_MODE_EXTERNAL ? "SSM.Doctor.AccessModeExternal" : "SSM.Doctor.AccessModePassword")
     },
     {
       name: game.i18n.localize("SSM.Doctor.PublishedActors"),

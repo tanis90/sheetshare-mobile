@@ -1,6 +1,6 @@
 # SheetShare Mobile
 
-手机优先、带密码保护的 Foundry VTT 角色卡分享模块。
+手机优先的 Foundry VTT 角色卡分享模块。默认使用带密码保护的加密快照；如果你有自己的门户或反向代理认证，也可以启用 External Auth 模式。
 
 SheetShare Mobile 让 GM 可以从 Foundry 里的 actor 发布一张适合手机阅读的角色卡。玩家打开分享链接，输入整桌分享密码，就能在手机上查看角色卡，不需要登录 Foundry。
 
@@ -10,7 +10,8 @@ SheetShare Mobile 让 GM 可以从 Foundry 里的 actor 发布一张适合手机
 
 - 手机优先的 D&D 5e 角色卡阅读界面
 - GM 按角色单独控制发布
-- 带密码保护的静态快照
+- 默认使用带密码保护的加密静态快照
+- 可选 External Auth 模式，适合已有门户或反向代理认证的部署
 - 不公开角色列表
 - 已打开角色卡在玩家设备上记住密码
 - 已发布角色响应 `updateActor` 变化后自动刷新
@@ -69,6 +70,8 @@ git clone https://github.com/tanis90/sheetshare-mobile.git sheetshare-mobile
 
 玩家在手机上打开链接，输入同一个分享密码后，会看到手机优先的只读角色卡。
 
+如果你的网站已经用门户或反向代理保护了分享页和快照资源，可以把 **访问模式** 切到 **External Auth / 受信门户**。这个模式下 GM 发布的是 trusted 快照，玩家不需要再输入 SheetShare 密码。
+
 ## 玩家角色卡预览
 
 分享出去的角色卡本身就是主要体验：玩家在手机上可以快速查看属性、法术位、资源次数、法术列表、动作和特性索引。
@@ -90,6 +93,7 @@ git clone https://github.com/tanis90/sheetshare-mobile.git sheetshare-mobile
 - **Actor 更新时自动刷新**：开启后，只要 GM 浏览器当前会话里有分享密码，已发布角色在 `updateActor` 变化后会自动刷新手机角色卡。
 - **HTTP 分享警告**：当前 Foundry 页面不是 HTTPS 时，Doctor 会提示公开分享风险。
 - **分享页语言**：可选择跟随玩家浏览器、跟随 Foundry 世界语言、强制英文或强制简体中文。
+- **访问模式**：使用带密码保护的加密快照，或在 `/modules/sheetshare-mobile/viewer` 和 `/assets/sheetshare-mobile` 已经由门户或反向代理保护时使用 External Auth。
 
 设置页里还有两个入口：
 
@@ -103,6 +107,8 @@ git clone https://github.com/tanis90/sheetshare-mobile.git sheetshare-mobile
 为了方便玩家使用，分享页成功解锁后会把密码保存在玩家自己的浏览器本地。点击 **锁定** 会清除这份本地密码；如果 GM 用新密码重新发布，旧密码会自动失效。
 
 公开分享时请使用 HTTPS，避免链接和密码输入页在传输过程中被截获。
+
+External Auth 模式会写出可直接读取的 trusted 快照。只有在外层认证同时保护分享页和 `Data/assets/sheetshare-mobile` 时才应启用；否则能拿到 JSON 的人就能读取已发布角色卡。
 
 ## 语言
 

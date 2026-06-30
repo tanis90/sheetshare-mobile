@@ -24,10 +24,16 @@
       "ViewerLanguageAuto": "Auto: use the player's browser language",
       "ViewerLanguageFoundry": "Use this Foundry world's language",
       "ViewerLanguageEnglish": "English",
-      "ViewerLanguageChinese": "Chinese (Simplified)"
+      "ViewerLanguageChinese": "Chinese (Simplified)",
+      "AccessModeName": "Access mode",
+      "AccessModeHint": "Password mode is the safe default. External Auth writes trusted snapshots and must only be used when the viewer and assets are protected by your reverse proxy or portal authentication.",
+      "AccessModePassword": "Password-protected encrypted snapshots",
+      "AccessModeExternal": "External Auth / trusted portal"
     },
     "Manager": {
-      "Intro": "Published sheets are encrypted static snapshots served by Foundry's existing web server.",
+      "Intro": "Published sheets are static snapshots served by Foundry's existing web server.",
+      "IntroPassword": "Current access mode: password-protected encrypted snapshots.",
+      "IntroExternal": "Current access mode: External Auth. Trusted snapshots must be served only behind your portal or reverse-proxy authentication.",
       "Character": "Character",
       "Visibility": "Visibility",
       "Status": "Status",
@@ -55,6 +61,7 @@
       "Protocol": "Protocol",
       "PublishedActors": "Published actors",
       "LegacyModule": "Legacy module",
+      "AccessMode": "Access mode",
       "StorageReadWrite": "Storage write/read",
       "ViewerAssets": "Viewer assets",
       "Https": "HTTPS",
@@ -62,6 +69,8 @@
       "PublishedCount": "{count} published",
       "LegacyActive": "cn5e-sheet-export is also active.",
       "LegacyInactive": "No legacy sheet export module active.",
+      "AccessModePassword": "Password-protected encrypted snapshots.",
+      "AccessModeExternal": "External Auth enabled. Protect /modules/sheetshare-mobile/viewer and /assets/sheetshare-mobile before sharing links.",
       "Readable": "Readable: {url}",
       "HttpStatus": "HTTP {status}: {url}"
     }

@@ -389,16 +389,16 @@ img {
 .hp-fill {
   height: 100%;
   border-radius: inherit;
-  background: var(--danger);
+  background: #8f1d22;
 }
 
 .hp-wounded .hp-fill {
-  background: var(--danger);
+  background: #8f1d22;
 }
 
 .hp-critical .hp-fill,
 .hp-down .hp-fill {
-  background: var(--danger);
+  background: #8f1d22;
 }
 
 .temp-hp-block {
@@ -418,7 +418,7 @@ img {
 .hp-temp-fill {
   height: 100%;
   border-radius: inherit;
-  background: #2f8fa3;
+  background: #2d7f93;
 }
 
 .spell-slot-panel,
@@ -974,17 +974,17 @@ details::before {
 }
 
 .hp-fill {
-  background: #9f1d25;
-  box-shadow: 0 0 18px rgba(110, 15, 24, 0.3);
+  background: #8f1d22;
+  box-shadow: 0 0 16px rgba(143, 29, 34, 0.28);
 }
 
 .hp-wounded .hp-fill {
-  background: #9f1d25;
+  background: #8f1d22;
 }
 
 .hp-critical .hp-fill,
 .hp-down .hp-fill {
-  background: #9f1d25;
+  background: #8f1d22;
 }
 
 .hp-temp-track {
@@ -992,8 +992,8 @@ details::before {
 }
 
 .hp-temp-fill {
-  background: #2f9fbd;
-  box-shadow: 0 0 14px rgba(47, 159, 189, 0.32);
+  background: #2d7f93;
+  box-shadow: 0 0 12px rgba(45, 127, 147, 0.28);
 }
 
 .spell-slot-row {

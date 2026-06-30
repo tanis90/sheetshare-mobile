@@ -2,7 +2,7 @@ import {
   cleanHtml, stripHtml, signed,
   localizeAbility, localizeSkill, localizeSpellSchool,
   localizeActivationType, localizeTargetType,
-  formatMovement, formatTraitList, formatPrice, formatUses,
+  formatTraitList, formatPrice, formatUses,
   formatRange, formatDuration, sortDocuments
 } from "./utils.js";
 
@@ -61,7 +61,7 @@ export async function extractCharacterSnapshot(actor) {
       proficiencyBonus: signed(attributes.prof ?? 0),
       ac: attributes.ac?.value ?? attributes.ac?.flat ?? "",
       initiative: resolveInitiative(attributes.init, abilities),
-      speed: formatMovement(attributes.movement, shortLabels()),
+      speed: formatSummarySpeed(attributes.movement),
       attackBonus: resolvePrimaryAttackBonus(items, attributes, abilities),
       spellAttackBonus: resolveSpellAttackBonus(attributes),
       spellSaveDc: attributes.spell?.dc ?? "",
@@ -574,6 +574,24 @@ function resolveInitiative(init, abilities = {}) {
   const abilityMod = Number(abilities?.[abilityKey]?.mod ?? 0);
   const bonus = Number(init.value ?? init.bonus ?? init.mod ?? 0);
   return signed(abilityMod + (Number.isFinite(bonus) ? bonus : 0));
+}
+
+function formatSummarySpeed(movement = {}) {
+  if (!movement) return "";
+  for (const key of ["walk", "fly", "swim", "climb", "burrow"]) {
+    const value = resolveMovementNumber(movement[key]);
+    if (value !== "") return String(value);
+  }
+  return "";
+}
+
+function resolveMovementNumber(raw) {
+  if (raw === null || raw === undefined || raw === "" || raw === 0) return "";
+  if (typeof raw === "object") {
+    return resolveMovementNumber(raw.total ?? raw.value ?? raw.base);
+  }
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : "";
 }
 
 function resolveAbilitySave(ability, prof = 0) {

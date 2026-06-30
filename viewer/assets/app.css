@@ -389,11 +389,11 @@ img {
 .hp-fill {
   height: 100%;
   border-radius: inherit;
-  background: var(--accent-2);
+  background: var(--danger);
 }
 
 .hp-wounded .hp-fill {
-  background: var(--warn);
+  background: var(--danger);
 }
 
 .hp-critical .hp-fill,
@@ -401,10 +401,24 @@ img {
   background: var(--danger);
 }
 
-.hp-panel p {
-  margin: 8px 0 0;
+.temp-hp-block {
+  margin-top: 8px;
+}
+
+.hp-temp-line {
+  margin-bottom: 5px;
   color: var(--muted);
   font-size: 12px;
+}
+
+.hp-temp-track {
+  height: 5px;
+}
+
+.hp-temp-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: #2f8fa3;
 }
 
 .spell-slot-panel,
@@ -960,17 +974,26 @@ details::before {
 }
 
 .hp-fill {
-  background: linear-gradient(90deg, #5b0c14, #9c7650 56%, #7f8990);
+  background: #9f1d25;
   box-shadow: 0 0 18px rgba(110, 15, 24, 0.3);
 }
 
 .hp-wounded .hp-fill {
-  background: linear-gradient(90deg, #6e532e, #c7a46c);
+  background: #9f1d25;
 }
 
 .hp-critical .hp-fill,
 .hp-down .hp-fill {
-  background: linear-gradient(90deg, #5b0c14, #b51b22);
+  background: #9f1d25;
+}
+
+.hp-temp-track {
+  background: rgba(5, 5, 5, 0.68);
+}
+
+.hp-temp-fill {
+  background: #2f9fbd;
+  box-shadow: 0 0 14px rgba(47, 159, 189, 0.32);
 }
 
 .spell-slot-row {

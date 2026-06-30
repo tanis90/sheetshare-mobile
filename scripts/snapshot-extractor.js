@@ -203,11 +203,13 @@ function buildHp(hp = {}) {
   const temp = numberOrZero(hp.temp);
   const tempmax = numberOrZero(hp.tempmax);
   const pct = max > 0 ? Math.max(0, Math.min(100, Math.round((value / max) * 100))) : 0;
+  const tempPct = temp > 0 ? Math.max(8, Math.min(100, Math.round((temp / Math.max(max, temp)) * 100))) : 0;
   return {
     value,
     max,
     temp,
     tempmax,
+    tempPct,
     formula: hp.formula || "",
     pct,
     state: value <= 0 ? "down" : pct < 35 ? "critical" : pct < 75 ? "wounded" : "healthy"

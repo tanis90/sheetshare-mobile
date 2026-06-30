@@ -63,6 +63,7 @@ const VIEWER_I18N = {
     spellDc: "Spell DC",
     passivePerception: "Passive",
     hp: "Hit Points",
+    tempHpLabel: "Temp HP",
     tempHp: "Temp HP {value}",
     spellSlots: "Spell Slots",
     availableSummary: "{available} / {max} available",
@@ -178,6 +179,7 @@ const VIEWER_I18N = {
     spellDc: "法术DC",
     passivePerception: "被动察觉",
     hp: "生命值",
+    tempHpLabel: "临时生命",
     tempHp: "临时生命 {value}",
     spellSlots: "法术环位",
     availableSummary: "{available} / {max} 可用",
@@ -553,6 +555,16 @@ window.characterSheetViewer = function characterSheetViewer() {
     resourcePct(resource) {
       const max = getResourceMax(resource);
       return max > 0 ? Math.max(0, Math.min(100, Math.round((getResourceAvailable(resource) / max) * 100))) : 0;
+    },
+
+    tempHpPct() {
+      const hp = this.selected?.resources?.hp ?? {};
+      const exportedPct = Number(hp.tempPct);
+      if (Number.isFinite(exportedPct) && exportedPct > 0) return exportedPct;
+      const temp = Number(hp.temp ?? 0);
+      if (!Number.isFinite(temp) || temp <= 0) return 0;
+      const max = Math.max(Number(hp.max ?? 0), temp);
+      return max > 0 ? Math.max(8, Math.min(100, Math.round((temp / max) * 100))) : 0;
     },
 
     resourceMeta(resource) {

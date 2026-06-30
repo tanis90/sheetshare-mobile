@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SheetShare Mobile</title>
   <link rel="stylesheet" href="assets/app.css">
-  <script defer src="assets/app.js?v=0.1.0-combat-stats"></script>
+  <script defer src="assets/app.js?v=0.1.0-temp-hp-bars"></script>
   <script defer src="assets/alpine.min.js"></script>
 </head>
 <body>
@@ -76,7 +76,15 @@
             <div class="hp-track">
               <div class="hp-fill" :style="`width: ${selected?.resources.hp.pct || 0}%`"></div>
             </div>
-            <p x-show="selected?.resources.hp.temp" x-text="t('tempHp', { value: selected?.resources.hp.temp })"></p>
+            <div class="temp-hp-block" x-show="selected?.resources.hp.temp">
+              <div class="hp-line hp-temp-line">
+                <strong x-text="t('tempHpLabel')">Temp HP</strong>
+                <span x-text="`+${selected?.resources.hp.temp ?? 0}`"></span>
+              </div>
+              <div class="hp-track hp-temp-track">
+                <div class="hp-temp-fill" :style="`width: ${tempHpPct()}%`"></div>
+              </div>
+            </div>
           </section>
 
           <section class="spell-slot-panel" x-show="selected?.resources.spellSlots.length">

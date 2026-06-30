@@ -62,6 +62,9 @@ export async function extractCharacterSnapshot(actor) {
       ac: attributes.ac?.value ?? attributes.ac?.flat ?? "",
       initiative: resolveInitiative(attributes.init, abilities),
       speed: formatMovement(attributes.movement, shortLabels()),
+      attackBonus: resolvePrimaryAttackBonus(items, attributes, abilities),
+      spellAttackBonus: resolveSpellAttackBonus(attributes),
+      spellSaveDc: attributes.spell?.dc ?? "",
       passivePerception: resolvePassivePerception(system.skills, abilities),
       spellcastingAbility: localizeAbility(attributes.spellcasting)
     },
@@ -830,15 +833,63 @@ function formatActivation(activation) {
 }
 
 function resolveAttackBonus(item, attributes, abilities = {}) {
+  const value = resolveWeaponAttackBonusValue(item, attributes, abilities);
+  if (value !== null) return signed(value);
+  return "";
+}
+
+function resolvePrimaryAttackBonus(items = [], attributes = {}, abilities = {}) {
+  const weapons = items.filter(item => item.type === "weapon");
+  const equipped = weapons.filter(item => item.system?.equipped);
+  const source = equipped.length ? equipped : weapons;
+  const weaponValues = source
+    .map(item => ({
+      item,
+      ability: resolveWeaponAbility(item, abilities),
+      value: resolveWeaponAttackBonusValue(item, attributes, abilities)
+    }))
+    .filter(candidate => Number.isFinite(candidate.value));
+
+  if (weaponValues.length) {
+    weaponValues.sort((a, b) => {
+      if (b.value !== a.value) return b.value - a.value;
+      if (a.ability === "str" && b.ability !== "str") return -1;
+      if (b.ability === "str" && a.ability !== "str") return 1;
+      return 0;
+    });
+    return signed(weaponValues[0].value);
+  }
+
+  return signed(resolveBasePhysicalAttackBonus(attributes, abilities));
+}
+
+function resolveWeaponAttackBonusValue(item, attributes = {}, abilities = {}) {
   const values = getItemActivities(item);
   const attack = values.find(activity => activity?.attack || activity?.type === "attack");
-  const bonus = Number(attack?.attack?.bonus ?? item.system?.attackBonus);
-  if (Number.isFinite(bonus) && bonus !== 0) return signed(bonus);
   const abilityKey = resolveWeaponAbility(item, abilities, attack);
+  const bonus = numericBonus(attack?.attack?.bonus ?? item.system?.attackBonus);
+  if (!abilityKey) return bonus || null;
   const abilityMod = Number(abilities?.[abilityKey]?.mod ?? 0);
-  const proficient = item.system?.proficient !== false;
-  if (abilityKey) return signed(abilityMod + (proficient ? Number(attributes.prof ?? 0) : 0));
-  return "";
+  const proficient = isWeaponProficient(item);
+  return abilityMod + (proficient ? Number(attributes.prof ?? 0) : 0) + bonus;
+}
+
+function resolveBasePhysicalAttackBonus(attributes = {}, abilities = {}) {
+  const prof = Number(attributes.prof ?? 0);
+  const str = Number(abilities.str?.mod ?? 0);
+  const dex = Number(abilities.dex?.mod ?? 0);
+  return (dex > str ? dex : str) + prof;
+}
+
+function resolveSpellAttackBonus(attributes = {}) {
+  const value = attributes.spell?.attack;
+  if (value === null || value === undefined || value === "") return "";
+  return signed(value);
+}
+
+function isWeaponProficient(item) {
+  const value = item.system?.proficient ?? item.system?.proficiency;
+  return !(value === false || value === 0 || value === "0");
 }
 
 function resolveDamage(item, abilities = {}) {
@@ -961,6 +1012,14 @@ function shortLabels() {
 function numberOrZero(value) {
   const number = Number(value);
   return Number.isFinite(number) ? number : 0;
+}
+
+function numericBonus(value) {
+  if (value === null || value === undefined || value === "") return 0;
+  const number = Number(value);
+  if (Number.isFinite(number)) return number;
+  const text = String(value).trim();
+  return /^[+-]?\d+$/.test(text) ? Number(text) : 0;
 }
 
 function spellLevelLabel(level) {

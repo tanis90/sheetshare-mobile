@@ -323,6 +323,10 @@ img {
   margin-bottom: 10px;
 }
 
+.combat-stat-grid {
+  margin-top: -2px;
+}
+
 .stat-tile {
   min-height: 62px;
   border: 1px solid var(--line);

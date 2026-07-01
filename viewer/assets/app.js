@@ -62,6 +62,11 @@ const VIEWER_I18N = {
     spellAttack: "Spell Atk",
     spellDc: "Spell DC",
     resistances: "Resist",
+    traitCount: "{count} types",
+    damageResistances: "Damage Resistances",
+    damageImmunities: "Damage Immunities",
+    damageVulnerabilities: "Damage Vulnerabilities",
+    conditionImmunities: "Condition Immunities",
     passivePerception: "Passive",
     hp: "Hit Points",
     tempHpLabel: "Temp HP",
@@ -179,6 +184,11 @@ const VIEWER_I18N = {
     spellAttack: "法术命中",
     spellDc: "法术DC",
     resistances: "抗性",
+    traitCount: "{count} 项",
+    damageResistances: "伤害抗性",
+    damageImmunities: "伤害免疫",
+    damageVulnerabilities: "伤害易伤",
+    conditionImmunities: "状态免疫",
     passivePerception: "被动察觉",
     hp: "生命值",
     tempHpLabel: "临时生命",
@@ -574,11 +584,11 @@ window.characterSheetViewer = function characterSheetViewer() {
     },
 
     resistanceSummary() {
-      return this.selected?.summary?.resistances || summarizeStringList(this.resistanceItems());
+      return compactTraitSummary(this.resistanceItems(), this.selected?.summary?.resistances);
     },
 
     resistanceTitle() {
-      return this.resistanceItems().join(" / ");
+      return traitFullText(this.resistanceItems(), this.selected?.summary?.resistances);
     },
 
     resourceMeta(resource) {
@@ -826,6 +836,20 @@ function summarizeStringList(items = []) {
   if (!values.length) return "";
   if (values.length <= 2) return values.join(" / ");
   return `${values.slice(0, 2).join(" / ")} +${values.length - 2}`;
+}
+
+function compactTraitSummary(items = [], fallback = "") {
+  const values = normalizeStringList(items?.length ? items : fallback);
+  if (!values.length) return "";
+  const joined = summarizeStringList(values);
+  if (values.length === 1 && joined.length <= 8) return joined;
+  if (values.length <= 2 && joined.length <= 8 && values.every(value => value.length <= 4)) return joined;
+  return t("traitCount", { count: values.length });
+}
+
+function traitFullText(items = [], fallback = "") {
+  const values = normalizeStringList(items?.length ? items : fallback);
+  return values.join(" / ");
 }
 
 function parseUsesText(value) {

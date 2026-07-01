@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.1 - 2026-07-01
+
+### Features
+
+- Add external-auth share mode for portal or reverse-proxy protected deployments.
+- Add inline `@UUID[...]` reference previews with a desktop side panel and mobile bottom sheet.
+- Add combat summary stats, resistance summary, passive perception, temporary hit points, and clearer resource counts to the mobile sheet.
+
+### Fixes
+
+- Localize Foundry trait labels such as languages, damage traits, and condition immunities in exported snapshots.
+- Avoid the unlock screen flashing while a remembered sheet is loading.
+- Improve compact mobile layout for speed, resistance, and resource displays.
+
 ## 0.1.0 - 2026-06-23
 
 ### Features

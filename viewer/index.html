@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SheetShare Mobile</title>
   <link rel="stylesheet" href="assets/app.css">
-  <script defer src="assets/app.js?v=0.1.0-discrete-resources"></script>
+  <script defer src="assets/app.js?v=0.1.0-resource-counts"></script>
   <script defer src="assets/alpine.min.js"></script>
 </head>
 <body>
@@ -117,12 +117,7 @@
                 <div class="resource-card">
                   <div class="resource-line">
                     <strong x-text="resource.name"></strong>
-                    <span x-text="`${resourceAvailable(resource)} / ${resourceMax(resource)}`"></span>
-                  </div>
-                  <div class="resource-pips" :aria-label="t('resourceAria', { name: resource.name, available: resourceAvailable(resource), max: resourceMax(resource) })">
-                    <template x-for="cell in resourceCells(resource)" :key="cell.key">
-                      <span class="resource-pip" :class="{ spent: cell.spent, more: cell.more }" x-text="cell.label || ''"></span>
-                    </template>
+                    <span class="resource-count" :class="{ empty: resourceAvailable(resource) <= 0 }" x-text="`${resourceAvailable(resource)} / ${resourceMax(resource)}`"></span>
                   </div>
                   <p x-show="resourceMeta(resource)" x-text="resourceMeta(resource)"></p>
                 </div>

@@ -562,10 +562,6 @@ window.characterSheetViewer = function characterSheetViewer() {
       return getResourceMax(resource);
     },
 
-    resourceCells(resource) {
-      return resourceCellsFor(resource);
-    },
-
     tempHpPct() {
       const hp = this.selected?.resources?.hp ?? {};
       const exportedPct = Number(hp.tempPct);
@@ -808,24 +804,6 @@ function fallbackSpecialResources(snapshot) {
       };
     })
     .filter(Boolean);
-}
-
-function resourceCellsFor(resource) {
-  const max = Math.max(getResourceMax(resource), 0);
-  const available = Math.max(getResourceAvailable(resource), 0);
-  const visibleMax = Math.min(max, 10);
-  const cells = Array.from({ length: visibleMax }, (_, index) => ({
-    key: index,
-    spent: index >= available
-  }));
-  if (max > visibleMax) {
-    cells.push({
-      key: "more",
-      more: true,
-      label: `+${max - visibleMax}`
-    });
-  }
-  return cells;
 }
 
 function parseUsesText(value) {

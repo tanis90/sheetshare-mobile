@@ -19,6 +19,9 @@ const VIEWER_I18N = {
     externalAuthFormatMismatch: "This link expects an externally protected sheet. Ask the GM to refresh the published sheet.",
     missingWorld: "The link is missing a world parameter. Ask the GM to copy the share link again.",
     missingSlug: "The link is missing a valid sheet parameter.",
+    referenceDetails: "Reference Details",
+    closeReference: "Close reference",
+    noReferenceDetails: "No details available.",
     tabs: {
       overview: "Overview",
       spells: "Spells",
@@ -140,6 +143,9 @@ const VIEWER_I18N = {
     externalAuthFormatMismatch: "这个链接需要外部认证模式的角色卡。请让 GM 刷新已发布角色卡。",
     missingWorld: "链接缺少 world 参数。请让 GM 重新复制分享链接。",
     missingSlug: "链接缺少有效的角色卡参数。",
+    referenceDetails: "引用详情",
+    closeReference: "关闭引用",
+    noReferenceDetails: "暂无引用详情。",
     tabs: {
       overview: "概览",
       spells: "法术",
@@ -330,6 +336,7 @@ window.characterSheetViewer = function characterSheetViewer() {
     spellLevel: "all",
     itemFilter: "all",
     tab: "overview",
+    activeReferenceId: "",
     pollTimer: null,
     snapshotBase: "",
     tabs: [
@@ -439,6 +446,7 @@ window.characterSheetViewer = function characterSheetViewer() {
       this.itemQuery = "";
       this.spellLevel = "all";
       this.itemFilter = "all";
+      if (this.activeReferenceId && !this.referenceById(this.activeReferenceId)) this.activeReferenceId = "";
       this.startPolling();
       window.scrollTo({ top: 0, behavior: "instant" });
     },
@@ -451,6 +459,7 @@ window.characterSheetViewer = function characterSheetViewer() {
       this.unlockError = "";
       this.needsPassword = !this.externalAuth;
       this.password = "";
+      this.closeReference();
       window.scrollTo({ top: 0, behavior: "instant" });
     },
 
@@ -577,6 +586,47 @@ window.characterSheetViewer = function characterSheetViewer() {
 
     resourceMeta(resource) {
       return [resource.recovery, resource.activation].filter(Boolean).join(" / ");
+    },
+
+    handleContentClick(event) {
+      const trigger = event.target.closest("[data-sheetshare-ref]");
+      if (!trigger) return;
+      event.preventDefault();
+      this.openReference(trigger.dataset.sheetshareRef);
+    },
+
+    referenceById(id) {
+      return id ? this.selected?.references?.[id] || null : null;
+    },
+
+    activeReference() {
+      return this.referenceById(this.activeReferenceId);
+    },
+
+    openReference(id) {
+      if (!this.referenceById(id)) return;
+      this.activeReferenceId = id;
+    },
+
+    closeReference() {
+      this.activeReferenceId = "";
+    },
+
+    activeReferenceSubtitle() {
+      const ref = this.activeReference();
+      return [ref?.typeLabel, ref?.source].filter(Boolean).join(" / ");
+    },
+
+    activeReferenceDescriptionHtml() {
+      return this.activeReference()?.descriptionHtml || `<p>${escapeHtml(this.t("noReferenceDetails"))}</p>`;
+    },
+
+    referenceFactsHtml() {
+      const facts = this.activeReference()?.facts ?? [];
+      if (!facts.length) return "";
+      return facts.map(fact => `
+        <span class="pill">${escapeHtml(fact.label)} ${escapeHtml(fact.value)}</span>
+      `).join("");
     },
 
     questPanelUrl() {

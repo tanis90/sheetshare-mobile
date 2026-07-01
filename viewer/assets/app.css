@@ -761,6 +761,116 @@ summary {
   overflow-wrap: anywhere;
 }
 
+.inline-ref {
+  display: inline;
+  min-height: 0;
+  border: 1px solid rgba(159, 47, 63, 0.42);
+  border-radius: 999px;
+  margin: 0 2px;
+  padding: 1px 7px;
+  background: rgba(159, 47, 63, 0.08);
+  color: var(--accent);
+  font: inherit;
+  font-weight: 900;
+  line-height: 1.35;
+  cursor: pointer;
+  vertical-align: baseline;
+}
+
+.inline-ref:hover,
+.inline-ref:focus-visible {
+  border-color: var(--accent);
+  background: rgba(159, 47, 63, 0.16);
+  outline: none;
+}
+
+.reference-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(0, 0, 0, 0.26);
+}
+
+.reference-panel {
+  position: fixed;
+  top: 72px;
+  right: 18px;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  width: min(420px, calc(100vw - 36px));
+  max-height: calc(100vh - 96px);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.reference-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.reference-head span,
+.reference-head p {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.reference-head h2 {
+  margin: 3px 0 0;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.reference-head p {
+  margin: 4px 0 0;
+}
+
+.reference-close {
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  aspect-ratio: 1;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.reference-body {
+  overflow: auto;
+  padding: 14px 16px 16px;
+}
+
+.reference-facts {
+  margin-bottom: 12px;
+}
+
+.reference-copy {
+  color: #344039;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.reference-copy h1,
+.reference-copy h2,
+.reference-copy h3,
+.reference-copy h4 {
+  margin-top: 16px;
+}
+
 .empty-state {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -867,6 +977,7 @@ body::after {
 
 .brand h1,
 .identity h2,
+.reference-head h2,
 .panel-head h3,
 .spell-slot-head h3,
 .special-resource-head h3,
@@ -914,6 +1025,7 @@ body::after {
 .stat-tile,
 .line-item,
 details,
+.reference-panel,
 .empty-state {
   border-color: var(--line);
   background:
@@ -1088,12 +1200,39 @@ summary {
   color: #c9bda7;
 }
 
+.reference-copy {
+  color: #c9bda7;
+}
+
 .detail-copy h1,
 .detail-copy h2,
 .detail-copy h3,
-.detail-copy h4 {
+.detail-copy h4,
+.reference-copy h1,
+.reference-copy h2,
+.reference-copy h3,
+.reference-copy h4 {
   color: var(--warn);
   font-family: "Cinzel Decorative", Cinzel, "Noto Serif SC", serif;
+}
+
+.inline-ref {
+  border-color: rgba(199, 164, 108, 0.42);
+  background: rgba(110, 15, 24, 0.22);
+  color: #d8b16d;
+}
+
+.inline-ref:hover,
+.inline-ref:focus-visible {
+  border-color: rgba(199, 164, 108, 0.78);
+  background: rgba(143, 29, 34, 0.34);
+  color: #f0dfbd;
+}
+
+.reference-close {
+  border-color: var(--line);
+  background:
+    linear-gradient(180deg, rgba(37, 31, 29, 0.94), rgba(8, 8, 8, 0.96));
 }
 
 @media (max-width: 719px) {
@@ -1144,5 +1283,30 @@ summary {
   .spell-slot-cell {
     width: 34px;
     border-radius: 6px;
+  }
+
+  .reference-backdrop {
+    background: rgba(0, 0, 0, 0.56);
+  }
+
+  .reference-panel {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: auto;
+    max-height: 86vh;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 14px 14px 0 0;
+  }
+
+  .reference-head {
+    padding: 16px 16px 12px;
+  }
+
+  .reference-body {
+    padding: 14px 16px 24px;
   }
 }

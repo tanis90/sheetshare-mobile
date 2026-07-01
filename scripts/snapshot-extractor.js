@@ -1,5 +1,5 @@
 import {
-  cleanHtml, stripHtml, signed,
+  cleanHtml, escapeHtml, stripHtml, signed,
   localizeAbility, localizeSkill, localizeSpellSchool,
   localizeActivationType, localizeTargetType,
   formatTraitList, formatPrice, formatUses,
@@ -18,6 +18,7 @@ const CN_TRANSLATION_PACKS = [
   "dnd5e.subclasses",
   "dnd5e.backgrounds"
 ];
+const UUID_LINK_PATTERN = /@UUID\[([^\]]+)\](?:\{([^}]*)\})?/g;
 let cnTranslationsPromise = null;
 
 export async function extractCharacterSnapshot(actor) {
@@ -29,6 +30,7 @@ export async function extractCharacterSnapshot(actor) {
   const items = getActorItems(actor);
   const translations = await loadCnTranslations();
   const builtTraits = buildTraits(traits);
+  const references = createReferenceCollector(translations);
 
   const snapshot = {
     schema: SNAPSHOT_SCHEMA,
@@ -89,12 +91,13 @@ export async function extractCharacterSnapshot(actor) {
       proficiencies: buildProficiencies(traits)
     },
     sections: {
-      actions: buildActions(items, attributes, abilities, translations),
-      inventory: buildInventory(items, translations),
-      features: buildFeatures(items, translations),
-      spells: buildSpells(items, attributes, translations),
-      effects: buildEffects(actor)
-    }
+      actions: await buildActions(items, attributes, abilities, translations, references),
+      inventory: await buildInventory(items, translations, references),
+      features: await buildFeatures(items, translations, references),
+      spells: await buildSpells(items, attributes, translations, references),
+      effects: await buildEffects(actor, references)
+    },
+    references: references.toSnapshot()
   };
 
   snapshot.contentHash = await hashSnapshot(snapshot);
@@ -445,11 +448,11 @@ function buildProficiencies(traits = {}) {
   };
 }
 
-function buildActions(items, attributes, abilities = {}, translations = null) {
-  const weapons = items
+async function buildActions(items, attributes, abilities = {}, translations = null, references = null) {
+  const weapons = await Promise.all(items
     .filter(item => item.type === "weapon")
     .sort(sortDocuments)
-    .map(item => ({
+    .map(async item => ({
       id: item.id,
       name: translateItemName(item, translations),
       img: normalizeAssetPath(item.img),
@@ -461,13 +464,13 @@ function buildActions(items, attributes, abilities = {}, translations = null) {
       saveAbility: "",
       range: formatRange(item.system?.range),
       uses: formatUses(item.system?.uses),
-      descriptionHtml: sanitizeHtml(translateItemDescription(item, translations))
-    }));
+      descriptionHtml: await buildDescriptionHtml(translateItemDescription(item, translations), references)
+    })));
 
-  const features = items
+  const features = await Promise.all(items
     .filter(item => item.type === "feat" && isActiveFeature(item))
     .sort(sortDocuments)
-    .map(item => ({
+    .map(async item => ({
       id: item.id,
       name: translateItemName(item, translations),
       img: normalizeAssetPath(item.img),
@@ -479,18 +482,18 @@ function buildActions(items, attributes, abilities = {}, translations = null) {
       saveAbility: resolveActivitySaveAbility(item),
       range: formatRange(item.system?.range),
       uses: formatUses(item.system?.uses),
-      descriptionHtml: sanitizeHtml(translateItemDescription(item, translations))
-    }));
+      descriptionHtml: await buildDescriptionHtml(translateItemDescription(item, translations), references)
+    })));
 
   return [...weapons, ...features];
 }
 
-function buildInventory(items, translations = null) {
+async function buildInventory(items, translations = null, references = null) {
   const allowed = new Set(["weapon", "equipment", "consumable", "loot", "container", "backpack", "tool"]);
-  return items
+  return Promise.all(items
     .filter(item => allowed.has(item.type))
     .sort(sortDocuments)
-    .map(item => ({
+    .map(async item => ({
       id: item.id,
       name: translateItemName(item, translations),
       img: normalizeAssetPath(item.img),
@@ -503,15 +506,15 @@ function buildInventory(items, translations = null) {
       weight: formatWeight(item.system?.weight),
       price: formatPrice(item.system?.price),
       uses: formatUses(item.system?.uses),
-      descriptionHtml: sanitizeHtml(translateItemDescription(item, translations))
-    }));
+      descriptionHtml: await buildDescriptionHtml(translateItemDescription(item, translations), references)
+    })));
 }
 
-function buildFeatures(items, translations = null) {
-  return items
+async function buildFeatures(items, translations = null, references = null) {
+  return Promise.all(items
     .filter(item => item.type === "feat")
     .sort(sortDocuments)
-    .map(item => ({
+    .map(async item => ({
       id: item.id,
       name: translateItemName(item, translations),
       img: normalizeAssetPath(item.img),
@@ -519,19 +522,19 @@ function buildFeatures(items, translations = null) {
       source: resolveSource(item),
       activation: formatActivityActivation(item) || formatActivation(item.system?.activation),
       uses: formatUses(item.system?.uses),
-      descriptionHtml: sanitizeHtml(translateItemDescription(item, translations))
-    }));
+      descriptionHtml: await buildDescriptionHtml(translateItemDescription(item, translations), references)
+    })));
 }
 
-function buildSpells(items, attributes, translations = null) {
-  return items
+async function buildSpells(items, attributes, translations = null, references = null) {
+  const spells = items
     .filter(item => item.type === "spell")
     .sort((a, b) => {
       const levelDiff = (a.system?.level ?? 0) - (b.system?.level ?? 0);
       if (levelDiff) return levelDiff;
       return translateItemName(a, translations).localeCompare(translateItemName(b, translations), game.i18n.lang);
-    })
-    .map(item => {
+    });
+  return Promise.all(spells.map(async item => {
       const properties = getProperties(item);
       const level = numberOrZero(item.system?.level);
       return {
@@ -551,24 +554,24 @@ function buildSpells(items, attributes, translations = null) {
         components: formatComponents(properties, item.system?.materials),
         attackBonus: signed(attributes.spell?.attack ?? 0),
         saveDc: attributes.spell?.dc ?? "",
-        descriptionHtml: sanitizeHtml(translateItemDescription(item, translations))
+        descriptionHtml: await buildDescriptionHtml(translateItemDescription(item, translations), references)
       };
-    });
+    }));
 }
 
-function buildEffects(actor) {
+async function buildEffects(actor, references = null) {
   const effects = actor.effects ? Array.from(actor.effects) : [];
-  return effects
+  const visibleEffects = effects
     .filter(effect => !effect.disabled)
-    .map(effect => ({
+    .sort((a, b) => a.name.localeCompare(b.name, game.i18n.lang));
+  return Promise.all(visibleEffects.map(async effect => ({
       id: effect.id,
       name: effect.name,
       img: normalizeAssetPath(effect.img || effect.icon),
       source: effect.parent?.name || "",
       disabled: Boolean(effect.disabled),
-      descriptionHtml: sanitizeHtml(effect.description || "")
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name, game.i18n.lang));
+      descriptionHtml: await buildDescriptionHtml(effect.description || "", references)
+    })));
 }
 
 function resolveSpecies(details, items, translations = null) {
@@ -1012,6 +1015,187 @@ function hasMeaningfulUses(uses) {
   const max = Number(uses.max ?? 0);
   const spent = Number(uses.spent ?? 0);
   return max > 0 || spent > 0;
+}
+
+async function buildDescriptionHtml(value, references = null) {
+  const html = cleanHtml(value);
+  if (!html) return "";
+  const enriched = references ? await references.enrich(html) : plainTextUuidLinks(html);
+  return sanitizeHtml(enriched);
+}
+
+function createReferenceCollector(translations = null) {
+  const entriesByUuid = new Map();
+  const pendingByUuid = new Map();
+
+  return {
+    async enrich(value) {
+      const html = cleanHtml(value);
+      if (!html) return "";
+      let output = "";
+      let lastIndex = 0;
+      for (const match of html.matchAll(uuidLinkPattern())) {
+        output += html.slice(lastIndex, match.index);
+        const uuid = String(match[1] || "").trim();
+        const inlineLabel = cleanReferenceLabel(match[2]);
+        const entry = await ensureEntry(uuid, inlineLabel);
+        output += entry
+          ? referenceButtonHtml(entry.id, inlineLabel || entry.name)
+          : escapeHtml(inlineLabel || fallbackUuidLabel(uuid));
+        lastIndex = match.index + match[0].length;
+      }
+      output += html.slice(lastIndex);
+      return output;
+    },
+
+    toSnapshot() {
+      return Object.fromEntries(
+        Array.from(entriesByUuid.values())
+          .sort((a, b) => a.id.localeCompare(b.id))
+          .map(entry => [entry.id, entry])
+      );
+    }
+  };
+
+  async function ensureEntry(uuid, label) {
+    if (!uuid) return null;
+    if (entriesByUuid.has(uuid)) return entriesByUuid.get(uuid);
+    if (pendingByUuid.has(uuid)) return pendingByUuid.get(uuid);
+
+    const pending = buildReferenceEntry(uuid, label)
+      .then(entry => {
+        if (entry) entriesByUuid.set(uuid, entry);
+        return entry;
+      })
+      .catch(error => {
+        console.warn(`${MODULE_ID} | Failed to resolve content reference`, uuid, error);
+        return null;
+      })
+      .finally(() => pendingByUuid.delete(uuid));
+
+    pendingByUuid.set(uuid, pending);
+    return pending;
+  }
+
+  async function buildReferenceEntry(uuid, label) {
+    const document = await resolveUuidDocument(uuid);
+    if (!document) return null;
+    const id = referenceIdForUuid(uuid);
+    const description = referenceDescription(document, translations);
+    return {
+      id,
+      uuid,
+      name: referenceName(document, label, translations),
+      type: referenceKind(document),
+      typeLabel: referenceTypeLabel(document),
+      img: normalizeAssetPath(document.img || document.icon),
+      source: referenceSource(document),
+      facts: referenceFacts(document),
+      descriptionHtml: sanitizeHtml(plainTextUuidLinks(description))
+    };
+  }
+}
+
+async function resolveUuidDocument(uuid) {
+  const resolver = globalThis.fromUuid || globalThis.foundry?.utils?.fromUuid;
+  if (typeof resolver !== "function") return null;
+  return resolver(uuid);
+}
+
+function referenceButtonHtml(id, label) {
+  return `<button class="inline-ref" type="button" data-sheetshare-ref="${escapeHtml(id)}">${escapeHtml(label || "Reference")}</button>`;
+}
+
+function plainTextUuidLinks(value) {
+  return cleanHtml(value).replace(uuidLinkPattern(), (_match, uuid, label) => escapeHtml(cleanReferenceLabel(label) || fallbackUuidLabel(uuid)));
+}
+
+function uuidLinkPattern() {
+  return new RegExp(UUID_LINK_PATTERN.source, "g");
+}
+
+function cleanReferenceLabel(value) {
+  return stripHtml(value).replace(/\s+/g, " ").trim();
+}
+
+function fallbackUuidLabel(uuid) {
+  const tail = String(uuid || "").split(".").pop() || "";
+  return tail ? tail.replace(/[-_]+/g, " ") : referenceUiLabel("Reference", "引用");
+}
+
+function referenceIdForUuid(uuid) {
+  let hash = 2166136261;
+  for (const char of String(uuid)) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `ref-${(hash >>> 0).toString(16)}`;
+}
+
+function referenceName(document, label, translations = null) {
+  if (document?.documentName === "Item" || document?.system) return translateItemName(document, translations) || label || document.name || "";
+  return label || document?.name || fallbackUuidLabel(document?.uuid);
+}
+
+function referenceKind(document) {
+  if (document?.documentName === "Item" || document?.system) {
+    if (document.type === "spell") return "spell";
+    if (document.type === "feat") return "feature";
+    return "item";
+  }
+  return String(document?.documentName || "reference").toLowerCase();
+}
+
+function referenceTypeLabel(document) {
+  const kind = referenceKind(document);
+  if (kind === "spell") return referenceUiLabel("Spell", "法术");
+  if (kind === "feature") return referenceUiLabel("Feature", "特性");
+  if (kind === "item") return referenceUiLabel("Item", "物品");
+  return document?.documentName || referenceUiLabel("Reference", "引用");
+}
+
+function referenceSource(document) {
+  if (document?.system) return resolveSource(document);
+  return document?.pack || "";
+}
+
+function referenceDescription(document, translations = null) {
+  if (document?.system) return translateItemDescription(document, translations);
+  return document?.text?.content || document?.content || document?.description || "";
+}
+
+function referenceFacts(document) {
+  if (!document?.system) return compactFacts([[referenceUiLabel("Source", "来源"), referenceSource(document)]]);
+  if (document.type === "spell") {
+    const properties = getProperties(document);
+    const level = numberOrZero(document.system?.level);
+    return compactFacts([
+      [referenceUiLabel("Level", "环阶"), spellLevelLabel(level)],
+      [referenceUiLabel("School", "学派"), localizeSpellSchool(document.system?.school)],
+      [referenceUiLabel("Casting", "施法"), formatActivityActivation(document) || formatActivation(document.system?.activation)],
+      [referenceUiLabel("Range", "范围"), formatRange(document.system?.range)],
+      [referenceUiLabel("Target", "目标"), formatTarget(document.system?.target)],
+      [referenceUiLabel("Duration", "持续"), formatDuration(document.system?.duration)],
+      [referenceUiLabel("Components", "成分"), formatComponents(properties, document.system?.materials)],
+      [referenceUiLabel("Source", "来源"), referenceSource(document)]
+    ]);
+  }
+  return compactFacts([
+    [referenceUiLabel("Activation", "激活"), formatActivityActivation(document) || formatActivation(document.system?.activation)],
+    [referenceUiLabel("Range", "范围"), formatRange(document.system?.range)],
+    [referenceUiLabel("Uses", "使用"), formatUses(document.system?.uses)],
+    [referenceUiLabel("Source", "来源"), referenceSource(document)]
+  ]);
+}
+
+function compactFacts(entries) {
+  return entries
+    .filter(([, value]) => value !== null && value !== undefined && value !== "" && value !== "—")
+    .map(([label, value]) => ({ label, value: String(value) }));
+}
+
+function referenceUiLabel(en, zh) {
+  return isChineseFoundryLanguage() ? zh : en;
 }
 
 function sanitizeHtml(value) {

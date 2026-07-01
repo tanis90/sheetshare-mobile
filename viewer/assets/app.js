@@ -320,6 +320,7 @@ window.characterSheetViewer = function characterSheetViewer() {
     error: "",
     unlockError: "",
     password: "",
+    loading: true,
     needsPassword: true,
     externalAuth: resolveViewerMode() === "external",
     unlocking: false,
@@ -363,6 +364,8 @@ window.characterSheetViewer = function characterSheetViewer() {
         await this.loadEnvelope();
       } catch (error) {
         this.error = error.message || String(error);
+      } finally {
+        this.loading = false;
       }
     },
 

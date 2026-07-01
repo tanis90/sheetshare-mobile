@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SheetShare Mobile</title>
-  <link rel="stylesheet" href="assets/app.css">
-  <script defer src="assets/app.js?v=0.1.0-resource-counts"></script>
+  <link rel="stylesheet" href="assets/app.css?v=0.1.0-load-gate">
+  <script defer src="assets/app.js?v=0.1.0-load-gate"></script>
   <script defer src="assets/alpine.min.js"></script>
 </head>
 <body>
-  <main class="app" x-data="characterSheetViewer()" x-init="init()">
+  <main class="app" x-data="characterSheetViewer()" x-init="init()" x-cloak>
     <header class="topbar">
       <div class="brand">
         <h1 x-text="selected ? selected.summary.name : t('brand')">SheetShare Mobile</h1>
@@ -25,7 +25,13 @@
       </div>
     </section>
 
-    <section class="screen" x-show="needsPassword && !selected && !error">
+    <section class="screen" x-show="loading && !error">
+      <div class="empty-state">
+        <strong x-text="t('loading')">Loading</strong>
+      </div>
+    </section>
+
+    <section class="screen" x-show="!loading && needsPassword && !selected && !error">
       <div class="unlock-card">
         <h2 x-text="t('enterPasswordTitle')">Enter Share Password</h2>
         <p x-text="t('passwordHelp')">This mobile sheet is protected.</p>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SheetShare Mobile</title>
   <link rel="stylesheet" href="assets/app.css">
-  <script defer src="assets/app.js?v=0.1.0-reactive-language"></script>
+  <script defer src="assets/app.js?v=0.1.0-discrete-resources"></script>
   <script defer src="assets/alpine.min.js"></script>
 </head>
 <body>
@@ -65,7 +65,7 @@
             <div class="stat-tile"><span x-text="t('attackBonus')">Attack</span><strong x-text="selected?.summary.attackBonus || '-'"></strong></div>
             <div class="stat-tile"><span x-text="t('spellAttack')">Spell Atk</span><strong x-text="selected?.summary.spellAttackBonus || '-'"></strong></div>
             <div class="stat-tile"><span x-text="t('spellDc')">Spell DC</span><strong x-text="selected?.summary.spellSaveDc || '-'"></strong></div>
-            <div class="stat-tile stat-tile-long" :title="resistanceTitle()"><span x-text="t('resistances')">Resist</span><strong x-text="resistanceSummary() || '-'"></strong></div>
+            <div class="stat-tile"><span x-text="t('passivePerception')">Passive</span><strong x-text="selected?.summary.passivePerception || '-'"></strong></div>
           </section>
 
           <section class="hp-panel" :class="'hp-' + (selected?.resources.hp.state || 'healthy')">
@@ -119,8 +119,10 @@
                     <strong x-text="resource.name"></strong>
                     <span x-text="`${resourceAvailable(resource)} / ${resourceMax(resource)}`"></span>
                   </div>
-                  <div class="resource-track" :aria-label="t('resourceAria', { name: resource.name, available: resourceAvailable(resource), max: resourceMax(resource) })">
-                    <div class="resource-fill" :style="`width: ${resourcePct(resource)}%`"></div>
+                  <div class="resource-pips" :aria-label="t('resourceAria', { name: resource.name, available: resourceAvailable(resource), max: resourceMax(resource) })">
+                    <template x-for="cell in resourceCells(resource)" :key="cell.key">
+                      <span class="resource-pip" :class="{ spent: cell.spent, more: cell.more }" x-text="cell.label || ''"></span>
+                    </template>
                   </div>
                   <p x-show="resourceMeta(resource)" x-text="resourceMeta(resource)"></p>
                 </div>

@@ -557,18 +557,46 @@ img {
   white-space: nowrap;
 }
 
-.resource-track {
-  height: 8px;
-  overflow: hidden;
+.resource-pips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
   margin-top: 8px;
-  border-radius: 999px;
-  background: #e7e2de;
 }
 
-.resource-fill {
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent), var(--warn));
+.resource-pip {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(178, 129, 70, 0.84);
+  border-radius: 5px;
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 244, 204, 0.72), transparent 18%),
+    linear-gradient(145deg, #d8b16d, #8f1d22 62%, #25110f);
+  color: var(--warn);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow:
+    0 0 10px rgba(143, 29, 34, 0.28),
+    inset 0 1px 0 rgba(255, 238, 190, 0.28),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.42);
+}
+
+.resource-pip.spent {
+  border-color: rgba(75, 89, 102, 0.78);
+  background:
+    linear-gradient(145deg, rgba(29, 35, 43, 0.92), rgba(6, 8, 13, 0.96));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.52);
+}
+
+.resource-pip.more {
+  width: auto;
+  min-width: 24px;
+  padding: 0 5px;
 }
 
 .resource-card p {
@@ -1039,16 +1067,6 @@ details::before {
 
 .resource-line strong {
   color: #d7c4a5;
-}
-
-.resource-track {
-  background: rgba(5, 5, 5, 0.68);
-  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.5);
-}
-
-.resource-fill {
-  background: linear-gradient(90deg, #6e0f18, #9c7650 70%, #c7a46c);
-  box-shadow: 0 0 14px rgba(199, 164, 108, 0.2);
 }
 
 .tabs {

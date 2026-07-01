@@ -62,7 +62,6 @@ const VIEWER_I18N = {
     spellAttack: "Spell Atk",
     spellDc: "Spell DC",
     resistances: "Resist",
-    traitCount: "{count} types",
     damageResistances: "Damage Resistances",
     damageImmunities: "Damage Immunities",
     damageVulnerabilities: "Damage Vulnerabilities",
@@ -184,7 +183,6 @@ const VIEWER_I18N = {
     spellAttack: "法术命中",
     spellDc: "法术DC",
     resistances: "抗性",
-    traitCount: "{count} 项",
     damageResistances: "伤害抗性",
     damageImmunities: "伤害免疫",
     damageVulnerabilities: "伤害易伤",
@@ -564,9 +562,8 @@ window.characterSheetViewer = function characterSheetViewer() {
       return getResourceMax(resource);
     },
 
-    resourcePct(resource) {
-      const max = getResourceMax(resource);
-      return max > 0 ? Math.max(0, Math.min(100, Math.round((getResourceAvailable(resource) / max) * 100))) : 0;
+    resourceCells(resource) {
+      return resourceCellsFor(resource);
     },
 
     tempHpPct() {
@@ -577,18 +574,6 @@ window.characterSheetViewer = function characterSheetViewer() {
       if (!Number.isFinite(temp) || temp <= 0) return 0;
       const max = Math.max(Number(hp.max ?? 0), temp);
       return max > 0 ? Math.max(8, Math.min(100, Math.round((temp / max) * 100))) : 0;
-    },
-
-    resistanceItems() {
-      return normalizeStringList(this.selected?.details?.traits?.damageResistances);
-    },
-
-    resistanceSummary() {
-      return compactTraitSummary(this.resistanceItems(), this.selected?.summary?.resistances);
-    },
-
-    resistanceTitle() {
-      return traitFullText(this.resistanceItems(), this.selected?.summary?.resistances);
     },
 
     resourceMeta(resource) {
@@ -825,31 +810,22 @@ function fallbackSpecialResources(snapshot) {
     .filter(Boolean);
 }
 
-function normalizeStringList(value) {
-  if (!value) return [];
-  const values = Array.isArray(value) ? value : String(value).split(/[;,/]/);
-  return values.map(item => String(item || "").trim()).filter(Boolean);
-}
-
-function summarizeStringList(items = []) {
-  const values = normalizeStringList(items);
-  if (!values.length) return "";
-  if (values.length <= 2) return values.join(" / ");
-  return `${values.slice(0, 2).join(" / ")} +${values.length - 2}`;
-}
-
-function compactTraitSummary(items = [], fallback = "") {
-  const values = normalizeStringList(items?.length ? items : fallback);
-  if (!values.length) return "";
-  const joined = summarizeStringList(values);
-  if (values.length === 1 && joined.length <= 8) return joined;
-  if (values.length <= 2 && joined.length <= 8 && values.every(value => value.length <= 4)) return joined;
-  return t("traitCount", { count: values.length });
-}
-
-function traitFullText(items = [], fallback = "") {
-  const values = normalizeStringList(items?.length ? items : fallback);
-  return values.join(" / ");
+function resourceCellsFor(resource) {
+  const max = Math.max(getResourceMax(resource), 0);
+  const available = Math.max(getResourceAvailable(resource), 0);
+  const visibleMax = Math.min(max, 10);
+  const cells = Array.from({ length: visibleMax }, (_, index) => ({
+    key: index,
+    spent: index >= available
+  }));
+  if (max > visibleMax) {
+    cells.push({
+      key: "more",
+      more: true,
+      label: `+${max - visibleMax}`
+    });
+  }
+  return cells;
 }
 
 function parseUsesText(value) {

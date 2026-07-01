@@ -252,8 +252,8 @@ const TRUSTED_SNAPSHOT_SCHEMA = "sheetshare-mobile.trusted-snapshot.v1";
 let activeLanguage = resolveInitialLanguage();
 applyDocumentLanguage(activeLanguage);
 
-function t(key, replacements = {}) {
-  const dictionary = VIEWER_I18N[activeLanguage] || VIEWER_I18N.en;
+function t(key, replacements = {}, language = activeLanguage) {
+  const dictionary = VIEWER_I18N[language] || VIEWER_I18N.en;
   const fallback = VIEWER_I18N.en;
   const value = lookup(dictionary, key) ?? lookup(fallback, key) ?? key;
   return String(value).replace(/\{(\w+)\}/g, (_match, name) => replacements[name] ?? "");
@@ -342,7 +342,7 @@ window.characterSheetViewer = function characterSheetViewer() {
     ],
 
     t(key, replacements = {}) {
-      return t(key, replacements);
+      return t(key, replacements, this.uiLanguage);
     },
 
     tabLabel(tab) {

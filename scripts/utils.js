@@ -55,9 +55,16 @@ export function escapeHtml(value) {
 export function localizeConfig(key, dictionary) {
   if (!key) return "";
   const entry = dictionary?.[key];
-  if (typeof entry === "string") return entry;
-  if (entry?.label) return entry.label;
+  if (typeof entry === "string") return localizeFoundryString(entry);
+  if (entry?.label) return localizeFoundryString(entry.label);
+  if (entry?.name) return localizeFoundryString(entry.name);
   return capitalize(key);
+}
+
+function localizeFoundryString(value) {
+  const text = String(value ?? "").trim();
+  if (!text) return "";
+  return globalThis.game?.i18n?.localize?.(text) || text;
 }
 
 export function localizeAbility(key) {
@@ -143,9 +150,7 @@ export function formatTraitList(trait, dictionary = null) {
     if (entry === null || entry === undefined || entry === "") return;
     let text = entry;
     if (dictionary && typeof entry === "string") {
-      const dictEntry = dictionary[entry];
-      if (typeof dictEntry === "string") text = dictEntry;
-      else if (dictEntry?.label) text = dictEntry.label;
+      text = localizeConfig(entry, dictionary);
     }
     text = String(text).trim();
     if (!text || /^select /i.test(text)) return;

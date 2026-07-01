@@ -569,6 +569,18 @@ window.characterSheetViewer = function characterSheetViewer() {
       return max > 0 ? Math.max(8, Math.min(100, Math.round((temp / max) * 100))) : 0;
     },
 
+    resistanceItems() {
+      return normalizeStringList(this.selected?.details?.traits?.damageResistances);
+    },
+
+    resistanceSummary() {
+      return this.selected?.summary?.resistances || summarizeStringList(this.resistanceItems());
+    },
+
+    resistanceTitle() {
+      return this.resistanceItems().join(" / ");
+    },
+
     resourceMeta(resource) {
       return [resource.recovery, resource.activation].filter(Boolean).join(" / ");
     },
@@ -801,6 +813,19 @@ function fallbackSpecialResources(snapshot) {
       };
     })
     .filter(Boolean);
+}
+
+function normalizeStringList(value) {
+  if (!value) return [];
+  const values = Array.isArray(value) ? value : String(value).split(/[;,/]/);
+  return values.map(item => String(item || "").trim()).filter(Boolean);
+}
+
+function summarizeStringList(items = []) {
+  const values = normalizeStringList(items);
+  if (!values.length) return "";
+  if (values.length <= 2) return values.join(" / ");
+  return `${values.slice(0, 2).join(" / ")} +${values.length - 2}`;
 }
 
 function parseUsesText(value) {

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Use prepared D&D 5e weapon activity attack bonuses for mobile sheet attack summaries, so effects such as Archery and magic weapons are included.
+
 ## 0.1.1 - 2026-07-01
 
 ### Features

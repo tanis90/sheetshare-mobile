@@ -890,9 +890,7 @@ function resolveAttackBonus(item, attributes, abilities = {}) {
 
 function resolvePrimaryAttackBonus(items = [], attributes = {}, abilities = {}) {
   const weapons = items.filter(item => item.type === "weapon");
-  const equipped = weapons.filter(item => item.system?.equipped);
-  const source = equipped.length ? equipped : weapons;
-  const weaponValues = source
+  const weaponValues = weapons
     .map(item => ({
       item,
       ability: resolveWeaponAbility(item, abilities),
@@ -915,13 +913,44 @@ function resolvePrimaryAttackBonus(items = [], attributes = {}, abilities = {}) 
 
 function resolveWeaponAttackBonusValue(item, attributes = {}, abilities = {}) {
   const values = getItemActivities(item);
-  const attack = values.find(activity => activity?.attack || activity?.type === "attack");
+  const attackValues = values.filter(activity => activity?.attack || activity?.type === "attack");
+  const preparedValues = attackValues
+    .map(resolvePreparedAttackBonusValue)
+    .filter(Number.isFinite);
+  if (preparedValues.length) return Math.max(...preparedValues);
+
+  const attack = attackValues[0];
   const abilityKey = resolveWeaponAbility(item, abilities, attack);
   const bonus = numericBonus(attack?.attack?.bonus ?? item.system?.attackBonus);
   if (!abilityKey) return bonus || null;
   const abilityMod = Number(abilities?.[abilityKey]?.mod ?? 0);
   const proficient = isWeaponProficient(item);
   return abilityMod + (proficient ? Number(attributes.prof ?? 0) : 0) + bonus;
+}
+
+function resolvePreparedAttackBonusValue(activity) {
+  const labels = activity?.labels ?? activity?.system?.labels ?? {};
+  const candidates = [
+    labels.toHit,
+    labels.modifier,
+    activity?.toHit,
+    activity?.modifier
+  ];
+  for (const candidate of candidates) {
+    const value = parseAttackBonus(candidate);
+    if (Number.isFinite(value)) return value;
+  }
+  return null;
+}
+
+function parseAttackBonus(value) {
+  if (typeof value === "number") return value;
+  const text = String(value ?? "").trim();
+  if (!text) return null;
+  const match = text.match(/[+-]?\d+(?:\.\d+)?/);
+  if (!match) return null;
+  const parsed = Number(match[0]);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
 function resolveBasePhysicalAttackBonus(attributes = {}, abilities = {}) {

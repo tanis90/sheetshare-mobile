@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Features
+
+- Write a `_latest.json` index for published sheets so external portals can resolve stable character keys to the latest exported snapshot.
+- Refresh published sheets after item and active effect changes, not only actor updates.
+
 ### Fixes
 
 - Use prepared D&D 5e weapon activity attack bonuses for mobile sheet attack summaries, so effects such as Archery and magic weapons are included.

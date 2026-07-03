@@ -14,7 +14,7 @@ SheetShare Mobile 让 GM 可以从 Foundry 里的 actor 发布一张适合手机
 - 可选 External Auth 模式，适合已有门户或反向代理认证的部署
 - 不公开角色列表
 - 已打开角色卡在玩家设备上记住密码
-- 已发布角色响应 `updateActor` 变化后自动刷新
+- 已发布角色响应角色、物品或 Active Effect 变化后自动刷新
 - 英文和简体中文 UI
 - Foundry 设置页里的管理面板和 Doctor 检查面板
 
@@ -90,7 +90,7 @@ git clone https://github.com/tanis90/sheetshare-mobile.git sheetshare-mobile
 
 可用设置：
 
-- **Actor 更新时自动刷新**：开启后，只要 GM 浏览器当前会话里有分享密码，已发布角色在 `updateActor` 变化后会自动刷新手机角色卡。
+- **自动刷新已发布角色卡**：开启后，只要 GM 浏览器当前会话里有分享密码，已发布角色在角色、物品或 Active Effect 变化后会自动刷新手机角色卡。
 - **HTTP 分享警告**：当前 Foundry 页面不是 HTTPS 时，Doctor 会提示公开分享风险。
 - **分享页语言**：可选择跟随玩家浏览器、跟随 Foundry 世界语言、强制英文或强制简体中文。
 - **访问模式**：使用带密码保护的加密快照，或在 `/modules/sheetshare-mobile/viewer` 和 `/assets/sheetshare-mobile` 已经由门户或反向代理保护时使用 External Auth。
@@ -136,4 +136,4 @@ SheetShare Mobile 的 Foundry 模块界面和手机分享页都有英文、简�
 
 ## 当前范围
 
-第一版公共发布目标聚焦常见单 GM 工作流。当前支持 `updateActor` 自动刷新。物品、法术准备、Active Effect 变动的专用 hook 会在更完整的系统实测后作为后续工作补上。
+第一版公共发布目标聚焦常见单 GM 工作流。当前支持已发布角色在角色、物品和 Active Effect 变化后自动刷新。

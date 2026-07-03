@@ -15,8 +15,8 @@
       "NoClipboard": "Copy this link: {url}"
     },
     "Settings": {
-      "AutoExportName": "Auto-refresh on actor updates",
-      "AutoExportHint": "When enabled, published character sheets refresh after updateActor changes while a GM browser has the share password in session.",
+      "AutoExportName": "Auto-refresh published sheets",
+      "AutoExportHint": "When enabled, published character sheets refresh after actor, item, or active effect changes while a GM browser has the share password in session.",
       "HttpWarningName": "Warn when sharing over HTTP",
       "HttpWarningHint": "Show a storage test warning when the current Foundry page is not served over HTTPS.",
       "ViewerLanguageName": "Viewer language",

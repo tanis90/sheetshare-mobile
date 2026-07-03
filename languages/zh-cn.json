@@ -15,8 +15,8 @@
       "NoClipboard": "请复制这个链接：{url}"
     },
     "Settings": {
-      "AutoExportName": "Actor 更新时自动刷新",
-      "AutoExportHint": "开启后，GM 浏览器会在当前会话已有分享密码时，为已发布角色响应 updateActor 变化并刷新手机角色卡。",
+      "AutoExportName": "自动刷新已发布角色卡",
+      "AutoExportHint": "开启后，GM 浏览器会在当前会话已有分享密码时，为已发布角色响应角色、物品或 Active Effect 变化并刷新手机角色卡。",
       "HttpWarningName": "HTTP 分享警告",
       "HttpWarningHint": "当前 Foundry 页面不是 HTTPS 时，在存储测试中显示安全提示。",
       "ViewerLanguageName": "分享页语言",

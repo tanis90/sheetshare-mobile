@@ -117,11 +117,7 @@ const VIEWER_I18N = {
     save: "Save",
     cantrip: "Cantrips",
     spellLevel: "Level {level}",
-    shortRest: "Short Rest",
-    notUpdated: "Not updated",
-    justNow: "Just now",
-    minutesAgo: "{count} min ago",
-    hoursAgo: "{count} hr ago"
+    shortRest: "Short Rest"
   },
   "zh-CN": {
     documentTitle: "SheetShare Mobile",
@@ -241,11 +237,7 @@ const VIEWER_I18N = {
     save: "豁免",
     cantrip: "戏法",
     spellLevel: "{level} 环",
-    shortRest: "短休",
-    notUpdated: "未更新",
-    justNow: "刚刚更新",
-    minutesAgo: "{count} 分钟前",
-    hoursAgo: "{count} 小时前"
+    shortRest: "短休"
   }
 };
 
@@ -638,20 +630,7 @@ window.characterSheetViewer = function characterSheetViewer() {
     },
 
     assetUrl(path) {
-      if (!path) return "";
-      if (/^(https?:|data:|blob:)/i.test(path)) return path;
-      return `/${String(path).replace(/^\/+/, "")}`;
-    },
-
-    formatUpdated(value) {
-      if (!value) return this.t("notUpdated");
-      const date = new Date(value);
-      if (Number.isNaN(date.getTime())) return this.t("justNow");
-      const seconds = Math.max(0, Math.round((Date.now() - date.getTime()) / 1000));
-      if (seconds < 60) return this.t("justNow");
-      if (seconds < 3600) return this.t("minutesAgo", { count: Math.floor(seconds / 60) });
-      if (seconds < 86400) return this.t("hoursAgo", { count: Math.floor(seconds / 3600) });
-      return date.toLocaleDateString(activeLanguage);
+      return window.SheetShareViewerPaths?.assetUrl(path, window.location.pathname) || "";
     },
 
     listPanelHtml(title, rows, valueKey, labelType = "") {

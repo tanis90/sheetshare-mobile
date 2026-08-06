@@ -5,11 +5,15 @@
 ### Features
 
 - Write a `_latest.json` index for published sheets so external portals can resolve stable character keys to the latest exported snapshot.
+- Generate readable Unicode actor keys with a world prefix, keep explicit keys stable, migrate the legacy `character` fallback for pure-Chinese names, and add a short actor-id only on collisions.
 - Refresh published sheets after item and active effect changes, not only actor updates.
+- Refresh External Auth worlds on primary-GM ready, clear inherited publish flags from new Actors, and fail closed on duplicate public keys or slugs.
+- Mirror safe raster portraits into content-addressed, world-scoped media paths shared by Foundry and campaign-prefixed viewers.
 
 ### Fixes
 
 - Use prepared D&D 5e weapon activity attack bonuses for mobile sheet attack summaries, so effects such as Archery and magic weapons are included.
+- Keep export/update timestamps as internal snapshot metadata instead of displaying freshness to players.
 
 ## 0.1.1 - 2026-07-01
 

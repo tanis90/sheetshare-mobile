@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SheetShare Mobile</title>
   <link rel="stylesheet" href="assets/app.css?v=0.1.0-inline-refs">
+  <script defer src="assets/path-utils.js?v=0.1.2-world-media"></script>
   <script defer src="assets/app.js?v=0.1.0-inline-refs"></script>
   <script defer src="assets/alpine.min.js"></script>
 </head>
@@ -54,9 +55,6 @@
             <div>
               <h2 x-text="selected?.summary.name"></h2>
               <p x-text="[selected?.summary.species, selected?.summary.classes].filter(Boolean).join(' / ')"></p>
-              <div class="pill-row">
-                <span class="pill" x-text="formatUpdated(selected?.exportedAt)"></span>
-              </div>
             </div>
           </section>
 

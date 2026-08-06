@@ -66,6 +66,8 @@ Then enable **SheetShare Mobile** in the world module list.
 
 Published sheets can be refreshed from the actor sheet header or from the manager panel.
 
+The first publication assigns a stable, human-readable key in the form `<world>-<character-name>`. Unicode names remain readable (for example, `dragonlance-黎安娜-晨盾`), explicit keys are not rewritten, and a short actor-id is appended only when that readable key is already in use. Pure-Chinese actors carrying the legacy `character` fallback migrate automatically on their next refresh.
+
 After a successful unlock, the player viewer remembers that sheet on the same browser. Refreshing or reopening the link unlocks automatically until the GM republishes with a different password. Use **Lock** on shared devices to clear the saved password.
 
 ![DM publishing Wizard to mobile](docs/screenshots/dm-publish-flow.png)
@@ -73,6 +75,8 @@ After a successful unlock, the player viewer remembers that sheet on the same br
 Players open the link on a phone, unlock it with the table password, and get a mobile-first read-only sheet.
 
 If your site already protects the viewer and snapshot assets behind a portal or reverse proxy, switch **Access mode** to **External Auth / trusted portal**. In that mode the GM publishes trusted snapshots and players do not enter a SheetShare password.
+
+External Auth worlds automatically refresh published sheets when the primary GM reaches `ready`. Publication identity checks, clone/import behavior, and world-scoped portrait mirroring are documented in [Publishing lifecycle and portal media](docs/PUBLISHING-LIFECYCLE.md).
 
 ## Player Sheet Preview
 

@@ -64,6 +64,8 @@ git clone https://github.com/tanis90/sheetshare-mobile.git sheetshare-mobile
 
 已发布角色可以在角色卡标题栏刷新，也可以在管理面板里刷新、复制链接或取消发布。
 
+角色首次发布时会得到 `<世界>-<角色名>` 形式的稳定可读 key。中文会原样保留，例如 `dragonlance-黎安娜-晨盾`；显式 key 不会被自动改写，只有可读 key 已被占用时才会追加短 actor-id。纯中文角色若还保留旧版通用 key `character`，会在下次刷新时自动迁移。
+
 玩家成功解锁一次后，同一浏览器会记住这张角色卡。刷新或重新打开链接会自动解锁，直到 GM 用不同密码重新发布。公共设备上请点击 **锁定** 清除已保存密码。
 
 ![DM 发布 Wizard 到手机端](docs/screenshots/dm-publish-flow.png)
@@ -71,6 +73,8 @@ git clone https://github.com/tanis90/sheetshare-mobile.git sheetshare-mobile
 玩家在手机上打开链接，输入同一个分享密码后，会看到手机优先的只读角色卡。
 
 如果你的网站已经用门户或反向代理保护了分享页和快照资源，可以把 **访问模式** 切到 **External Auth / 受信门户**。这个模式下 GM 发布的是 trusted 快照，玩家不需要再输入 SheetShare 密码。
+
+External Auth 世界会在主 GM 进入 `ready` 后自动刷新已发布角色。发布身份校验、克隆/导入规则以及按世界隔离的头像镜像详见 [发布生命周期与门户媒体](docs/PUBLISHING-LIFECYCLE.md)。
 
 ## 玩家角色卡预览
 

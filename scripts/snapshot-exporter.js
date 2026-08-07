@@ -163,8 +163,12 @@ export async function exportActorSnapshot(actor, { reason = "manual", password =
   await ensureExportDirectories();
 
   const snapshot = await extractCharacterSnapshot(actor);
+  const portrait = accessMode === ACCESS_MODE_EXTERNAL ? await mirrorActorPortrait(actor) : "";
   const lastHash = lastHashes.get(actor.id);
   if (lastHash === snapshot.contentHash && reason !== "manual") {
+    if (publish.portrait !== portrait) {
+      await actor.setFlag(MODULE_ID, PUBLISH_FLAG, { ...publish, portrait });
+    }
     await uploadLatestIndex();
     return snapshot;
   }
@@ -184,7 +188,8 @@ export async function exportActorSnapshot(actor, { reason = "manual", password =
     lastExportStatus: "ok",
     lastExportError: "",
     contentHash: snapshot.contentHash,
-    accessMode
+    accessMode,
+    portrait
   });
   await uploadLatestIndex();
 
@@ -323,6 +328,7 @@ async function ensureExportDirectories() {
   await ensureDirectory("assets");
   await ensureDirectory(`assets/${STORAGE_ROOT_NAME}`);
   await ensureDirectory(storageRoot());
+  await ensureDirectory(`${storageRoot()}/media`);
 }
 
 async function ensureDirectory(path) {
@@ -343,6 +349,46 @@ async function uploadJson(path, filename, value) {
 
 async function uploadLatestIndex() {
   await uploadJson(storageRoot(), LATEST_INDEX_FILENAME, buildLatestIndexDocument());
+}
+
+async function mirrorActorPortrait(actor) {
+  const source = String(actor?.img || "").trim();
+  if (!source) return "";
+
+  const response = await fetch(/^(?:https?:|data:)/i.test(source) ? source : route(source), {
+    cache: "no-store",
+    credentials: "include"
+  });
+  if (!response.ok) throw new Error(`Portrait fetch failed: HTTP ${response.status}`);
+
+  const blob = await response.blob();
+  const extension = imageExtension(blob.type, source);
+  if (!extension) throw new Error(`Unsupported portrait image type: ${blob.type || source}`);
+
+  const digest = await crypto.subtle.digest("SHA-256", await blob.arrayBuffer());
+  const hash = Array.from(new Uint8Array(digest))
+    .map(byte => byte.toString(16).padStart(2, "0"))
+    .join("");
+  const filename = `${hash}.${extension}`;
+  const file = new File([blob], filename, { type: blob.type || `image/${extension}` });
+  await FilePicker.upload("data", `${storageRoot()}/media`, file, { overwrite: true }, { notify: false });
+  return `${storageRoot()}/media/${filename}`;
+}
+
+function imageExtension(contentType, source) {
+  const mime = String(contentType || "").split(";", 1)[0].trim().toLowerCase();
+  const byMime = {
+    "image/png": "png",
+    "image/jpeg": "jpg",
+    "image/webp": "webp",
+    "image/gif": "gif"
+  }[mime];
+  if (byMime) return byMime;
+
+  const pathname = String(source).split(/[?#]/, 1)[0].toLowerCase();
+  const match = pathname.match(/\.(png|jpe?g|webp|gif)$/);
+  if (!match) return "";
+  return match[1] === "jpeg" ? "jpg" : match[1];
 }
 
 function buildLatestIndexDocument() {
@@ -375,6 +421,7 @@ function buildLatestActorEntry(actor) {
     updatedAt: publish.lastExportedAt || "",
     contentHash: publish.contentHash || "",
     accessMode,
+    ...(accessMode === ACCESS_MODE_EXTERNAL && publish.portrait ? { portrait: publish.portrait } : {}),
     viewer: {
       world: game.world.id,
       mode: accessMode === ACCESS_MODE_EXTERNAL ? "external" : "password",

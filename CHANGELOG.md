@@ -11,6 +11,7 @@
 
 - Use prepared D&D 5e weapon activity attack bonuses for mobile sheet attack summaries, so effects such as Archery and magic weapons are included.
 - Mirror externally authenticated Actor portraits into the published world media directory and expose only the hashed media path in `_latest.json`.
+- Give every published Actor a stable slug-backed key so names, renames, and non-Latin scripts cannot collide.
 
 ## 0.1.1 - 2026-07-01
 

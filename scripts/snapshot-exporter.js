@@ -1,4 +1,8 @@
 import { extractCharacterSnapshot } from "./snapshot-extractor.js";
+import {
+  resolvePublishedActorKey,
+  slugifyPublishedActor as slugify
+} from "./published-actor-key.js";
 
 export const MODULE_ID = "sheetshare-mobile";
 export const STORAGE_ROOT_NAME = "sheetshare-mobile";
@@ -116,11 +120,12 @@ export async function setActorPublished(actor, enabled) {
   if (!game.user?.isGM) throw new Error("Only a GM can publish mobile sheets.");
 
   const current = getPublishData(actor);
+  const slug = current.slug || generateSlug();
   const next = {
     ...current,
     enabled: Boolean(enabled),
-    slug: current.slug || generateSlug(),
-    key: current.key || slugify(actor.name),
+    slug,
+    key: resolvePublishedActorKey({ slug }),
     lastExportStatus: enabled ? (current.lastExportStatus || "pending") : "disabled",
     lastExportError: enabled ? (current.lastExportError || "") : ""
   };
@@ -183,7 +188,7 @@ export async function exportActorSnapshot(actor, { reason = "manual", password =
     ...publish,
     enabled: true,
     slug: publish.slug,
-    key: publish.key || slugify(actor.name),
+    key: resolvePublishedActorKey({ slug: publish.slug }),
     lastExportedAt: exported.updatedAt,
     lastExportStatus: "ok",
     lastExportError: "",
@@ -410,12 +415,12 @@ function buildLatestIndexDocument() {
 function buildLatestActorEntry(actor) {
   const publish = getPublishData(actor);
   if (!publish.enabled || !publish.slug) return null;
-  const key = publish.key || slugify(actor.name);
+  const key = resolvePublishedActorKey({ slug: publish.slug });
   const language = shareUrlLanguage();
   const accessMode = publish.accessMode || sheetAccessMode();
   return {
     key,
-    aliases: uniqueStrings([key, slugify(actor.name), publish.slug]),
+    aliases: uniqueStrings([key, publish.key, slugify(actor.name), publish.slug]),
     name: actor.name,
     slug: publish.slug,
     updatedAt: publish.lastExportedAt || "",
@@ -557,15 +562,6 @@ function generateSlug() {
   return Array.from(bytes)
     .map(byte => byte.toString(16).padStart(2, "0"))
     .join("");
-}
-
-function slugify(value) {
-  return String(value || "character")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .toLowerCase() || "character";
 }
 
 function notifyError(error) {

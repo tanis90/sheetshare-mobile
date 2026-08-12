@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Mobile-first character sheet viewer for Foundry VTT shares.">
   <meta name="theme-color" content="#050505">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpolygon points='16,2 29,9.5 29,22.5 16,30 3,22.5 3,9.5' fill='%23050505' stroke='%23c7a46c' stroke-width='2'/%3E%3Ctext x='16' y='21' font-size='13' text-anchor='middle' fill='%23c7a46c' font-family='serif' font-weight='bold'%3ES%3C/text%3E%3C/svg%3E">
   <title>SheetShare Mobile</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,7 +42,7 @@
         <h2 x-text="t('enterPasswordTitle')">Enter Share Password</h2>
         <p x-text="t('passwordHelp')">This mobile sheet is protected.</p>
         <form x-on:submit.prevent="unlock()">
-          <input class="search" type="password" autocomplete="current-password" :placeholder="t('passwordPlaceholder')" x-model="password">
+          <input class="search" id="share-password" name="share-password" type="password" autocomplete="current-password" :placeholder="t('passwordPlaceholder')" x-model="password">
           <p class="unlock-error" x-show="unlockError" x-text="unlockError"></p>
           <button class="primary-button" type="submit" :disabled="unlocking" x-text="unlocking ? t('unlocking') : t('unlockSheet')"></button>
         </form>
@@ -53,7 +54,7 @@
         <aside class="summary-column">
           <section class="identity">
             <div class="portrait">
-              <img x-show="selected?.summary.portrait" :src="assetUrl(selected?.summary.portrait)" alt="">
+              <img x-show="selected?.summary.portrait" :src="assetUrl(selected?.summary.portrait)" alt="" width="78" height="78" loading="lazy">
               <span x-show="!selected?.summary.portrait" x-text="initials(selected?.summary.name)"></span>
             </div>
             <div>
@@ -76,14 +77,14 @@
           <section class="stat-grid">
             <div class="stat-tile"><span>AC</span><strong x-text="selected?.summary.ac || '-'"></strong></div>
             <div class="stat-tile"><span x-text="t('initiative')">Initiative</span><strong x-text="selected?.summary.initiative || '-'"></strong></div>
-            <div class="stat-tile"><span x-text="t('speed')">Speed</span><strong x-text="selected?.summary.speed || '-'"></strong></div>
+            <div class="stat-tile"><span x-text="t('speed')">Speed</span><strong :class="{ long: String(selected?.summary.speed || '').length > 10 }" x-text="selected?.summary.speed || '-'"></strong></div>
             <div class="stat-tile"><span x-text="t('proficiency')">Proficiency</span><strong x-text="selected?.summary.proficiencyBonus || '-'"></strong></div>
           </section>
 
           <section class="stat-grid combat-stat-grid">
             <div class="stat-tile"><span x-text="t('attackBonus')">Attack</span><strong x-text="selected?.summary.attackBonus || '-'"></strong></div>
-            <div class="stat-tile"><span x-text="t('spellAttack')">Spell Atk</span><strong x-text="selected?.summary.spellAttackBonus || '-'"></strong></div>
-            <div class="stat-tile"><span x-text="t('spellDc')">Spell DC</span><strong x-text="selected?.summary.spellSaveDc || '-'"></strong></div>
+            <div class="stat-tile" x-show="hasSpellcasting()"><span x-text="t('spellAttack')">Spell Atk</span><strong x-text="selected?.summary.spellAttackBonus || '-'"></strong></div>
+            <div class="stat-tile" x-show="hasSpellcasting()"><span x-text="t('spellDc')">Spell DC</span><strong x-text="selected?.summary.spellSaveDc || '-'"></strong></div>
             <div class="stat-tile"><span x-text="t('passivePerception')">Passive</span><strong x-text="selected?.summary.passivePerception || '-'"></strong></div>
           </section>
 
@@ -117,7 +118,7 @@
                   <strong x-text="spellSlotLabel(slot)"></strong>
                   <span x-text="`${spellSlotAvailable(slot)} / ${slot.max}`"></span>
                 </div>
-                <div class="spell-slot-cells" :aria-label="t('spellSlotAria', { level: spellSlotLabel(slot), available: spellSlotAvailable(slot), max: slot.max })">
+                <div class="spell-slot-cells" role="group" :aria-label="t('spellSlotAria', { level: spellSlotLabel(slot), available: spellSlotAvailable(slot), max: slot.max })">
                   <template x-for="cell in spellSlotCells(slot)" :key="cell.index">
                     <span class="spell-slot-cell" :class="{ spent: cell.spent }"></span>
                   </template>
@@ -147,7 +148,7 @@
 
         <section class="content-column">
           <nav class="tabs">
-            <template x-for="tabItem in tabs" :key="tabItem.id">
+            <template x-for="tabItem in visibleTabs()" :key="tabItem.id">
               <button class="tab" :class="{ active: tab === tabItem.id }" type="button" x-on:click="tab = tabItem.id" x-text="tabLabel(tabItem)"></button>
             </template>
           </nav>
@@ -166,8 +167,8 @@
               </div>
             </div>
 
-            <div x-html="listPanelHtml(t('saves'), selected?.details.saves, 'value', 'ability')"></div>
-            <div x-html="listPanelHtml(t('skills'), selected?.details.skills, 'mod', 'skill')"></div>
+            <div x-html="listPanelHtml(t('saves'), selected?.details.saves, 'value', 'ability', true)"></div>
+            <div x-html="listPanelHtml(t('skills'), selected?.details.skills, 'mod', 'skill', true)"></div>
             <div x-html="traitPanelHtml(t('damageResistances'), selected?.details.traits.damageResistances)"></div>
             <div x-html="traitPanelHtml(t('damageImmunities'), selected?.details.traits.damageImmunities)"></div>
             <div x-html="traitPanelHtml(t('damageVulnerabilities'), selected?.details.traits.damageVulnerabilities)"></div>
@@ -178,7 +179,7 @@
 
           <section x-show="tab === 'spells'">
             <div class="filters">
-              <input class="search" type="search" :placeholder="t('searchSpells')" x-model.debounce.150ms="spellQuery">
+              <input class="search" name="spell-search" type="search" :placeholder="t('searchSpells')" x-model.debounce.150ms="spellQuery">
               <div class="segmented">
                 <button type="button" :class="{ active: spellLevel === 'all' }" x-on:click="spellLevel = 'all'" x-text="t('all')">All</button>
                 <template x-for="level in spellLevels()" :key="level">
@@ -195,7 +196,7 @@
 
           <section x-show="tab === 'inventory'">
             <div class="filters">
-              <input class="search" type="search" :placeholder="t('searchItems')" x-model.debounce.150ms="itemQuery">
+              <input class="search" name="item-search" type="search" :placeholder="t('searchItems')" x-model.debounce.150ms="itemQuery">
               <div class="segmented">
                 <button type="button" :class="{ active: itemFilter === 'all' }" x-on:click="itemFilter = 'all'" x-text="t('all')">All</button>
                 <button type="button" :class="{ active: itemFilter === 'equipped' }" x-on:click="itemFilter = 'equipped'" x-text="t('equipped')">Equipped</button>

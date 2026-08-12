@@ -489,6 +489,7 @@ window.characterSheetViewer = function characterSheetViewer() {
         try {
           const next = await this.fetchSnapshot();
           if (!this.selected || next.contentHash !== this.selected.contentHash) this.selected = next;
+          if (!this.visibleTabs().some(tabItem => tabItem.id === this.tab)) this.tab = "overview";
         } catch (error) {
           if (error?.sheetshareDecryptFailed) {
             clearCachedPassword();
@@ -630,7 +631,21 @@ window.characterSheetViewer = function characterSheetViewer() {
     },
 
     initials(name) {
-      return String(name || "?").split(/\s+/).map(part => part[0]).slice(0, 2).join("").toUpperCase();
+      const text = String(name || "?").trim();
+      const cjk = text.match(/^[一-鿿·]+/);
+      if (cjk) return Array.from(cjk[0].replace(/·/g, "")).slice(0, 2).join("");
+      return text.split(/\s+/).map(part => part[0]).slice(0, 2).join("").toUpperCase();
+    },
+
+    hasSpellcasting() {
+      const summary = this.selected?.summary ?? {};
+      return Boolean(summary.spellAttackBonus || summary.spellSaveDc
+        || (this.selected?.resources?.spellSlots ?? []).length
+        || (this.selected?.sections?.spells ?? []).length);
+    },
+
+    visibleTabs() {
+      return this.tabs.filter(tabItem => tabItem.id !== "spells" || this.hasSpellcasting());
     },
 
     classIconEntries() {
@@ -663,7 +678,7 @@ window.characterSheetViewer = function characterSheetViewer() {
       return date.toLocaleDateString(activeLanguage);
     },
 
-    listPanelHtml(title, rows, valueKey, labelType = "") {
+    listPanelHtml(title, rows, valueKey, labelType = "", twoCol = false) {
       const safeRows = rows ?? [];
       if (!safeRows.length) return "";
       const displayRows = labelType === "skill"
@@ -673,7 +688,7 @@ window.characterSheetViewer = function characterSheetViewer() {
         <div class="panel">
           <div class="panel-head"><h3>${escapeHtml(title)}</h3></div>
           <div class="panel-body">
-            <div class="compact-list">
+            <div class="compact-list${twoCol ? " two-col" : ""}">
               ${displayRows.map(row => `
                 <div class="line-item">
                   <span class="line-name">${escapeHtml(localizedListLabel(row, labelType))}</span>

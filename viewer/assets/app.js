@@ -8,6 +8,8 @@ const VIEWER_I18N = {
     enterPasswordTitle: "Enter Share Password",
     passwordHelp: "This mobile sheet is protected. The password unlocks it in this browser and is not sent to the server.",
     passwordPlaceholder: "Share password",
+    showPassword: "Show password",
+    hidePassword: "Hide password",
     unlocking: "Unlocking...",
     unlockSheet: "Unlock Sheet",
     missingPassword: "Enter the share password.",
@@ -133,6 +135,8 @@ const VIEWER_I18N = {
     enterPasswordTitle: "输入分享密码",
     passwordHelp: "这张手机角色卡受密码保护。密码只在此浏览器中用于解锁，不会发送给服务器。",
     passwordPlaceholder: "分享密码",
+    showPassword: "显示密码",
+    hidePassword: "隐藏密码",
     unlocking: "解锁中...",
     unlockSheet: "解锁角色卡",
     missingPassword: "请输入分享密码。",
@@ -332,6 +336,7 @@ window.characterSheetViewer = function characterSheetViewer() {
     error: "",
     unlockError: "",
     password: "",
+    showPassword: false,
     loading: true,
     needsPassword: true,
     externalAuth: resolveViewerMode() === "external",
@@ -637,6 +642,17 @@ window.characterSheetViewer = function characterSheetViewer() {
       const cjk = text.match(/^[一-鿿·]+/);
       if (cjk) return Array.from(cjk[0].replace(/·/g, "")).slice(0, 2).join("");
       return text.split(/\s+/).map(part => part[0]).slice(0, 2).join("").toUpperCase();
+    },
+
+    // Long names wrap badly in the identity block; shrink the font in two steps.
+    // CJK glyphs count double because they take roughly twice the width.
+    nameLengthClass(name) {
+      const text = String(name || "");
+      let width = 0;
+      for (const ch of text) width += ch.charCodeAt(0) > 0xff ? 2 : 1;
+      if (width > 56) return "name-xl";
+      if (width > 36) return "name-long";
+      return "";
     },
 
     hasSpellcasting() {

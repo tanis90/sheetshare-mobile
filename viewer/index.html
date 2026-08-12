@@ -31,18 +31,54 @@
       </div>
     </section>
 
-    <section class="screen" x-show="loading && !error">
-      <div class="empty-state">
-        <strong x-text="t('loading')">Loading</strong>
+    <section class="screen" x-show="loading && !error" aria-busy="true">
+      <span class="visually-hidden" x-text="t('loading')">Loading</span>
+      <div class="skeleton-shell" aria-hidden="true">
+        <div class="skeleton-identity">
+          <div class="skeleton skeleton-portrait"></div>
+          <div class="skeleton-lines">
+            <div class="skeleton skeleton-line" style="width: 68%"></div>
+            <div class="skeleton skeleton-line" style="width: 42%"></div>
+            <div class="skeleton skeleton-line" style="width: 54%"></div>
+          </div>
+        </div>
+        <div class="skeleton-grid">
+          <div class="skeleton skeleton-tile"></div>
+          <div class="skeleton skeleton-tile"></div>
+          <div class="skeleton skeleton-tile"></div>
+          <div class="skeleton skeleton-tile"></div>
+        </div>
+        <div class="skeleton skeleton-block"></div>
+        <div class="skeleton skeleton-block" style="height: 90px"></div>
       </div>
     </section>
 
     <section class="screen" x-show="!loading && needsPassword && !selected && !error">
       <div class="unlock-card">
+        <div class="unlock-badge" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
+            <path d="M24 3 42 10v13c0 11-7.6 18.4-18 22C14.4 41.4 6 34 6 23V10L24 3Z"/>
+            <rect x="17" y="21" width="14" height="11" rx="2"/>
+            <path d="M20 21v-3a4 4 0 0 1 8 0v3" stroke-linecap="round"/>
+          </svg>
+        </div>
         <h2 x-text="t('enterPasswordTitle')">Enter Share Password</h2>
         <p x-text="t('passwordHelp')">This mobile sheet is protected.</p>
         <form x-on:submit.prevent="unlock()">
-          <input class="search" id="share-password" name="share-password" type="password" autocomplete="current-password" :placeholder="t('passwordPlaceholder')" x-model="password">
+          <div class="password-field">
+            <input class="search" id="share-password" name="share-password" :type="showPassword ? 'text' : 'password'" autocomplete="current-password" :placeholder="t('passwordPlaceholder')" x-model="password">
+            <button class="password-toggle" type="button" x-on:click="showPassword = !showPassword" :aria-label="showPassword ? t('hidePassword') : t('showPassword')" :aria-pressed="showPassword">
+              <svg x-show="!showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg x-show="showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+                <circle cx="12" cy="12" r="3"/>
+                <path d="m4 4 16 16"/>
+              </svg>
+            </button>
+          </div>
           <p class="unlock-error" x-show="unlockError" x-text="unlockError"></p>
           <button class="primary-button" type="submit" :disabled="unlocking" x-text="unlocking ? t('unlocking') : t('unlockSheet')"></button>
         </form>
@@ -58,7 +94,7 @@
               <span x-show="!selected?.summary.portrait" x-text="initials(selected?.summary.name)"></span>
             </div>
             <div>
-              <h2 x-text="selected?.summary.name"></h2>
+              <h2 x-text="selected?.summary.name" :class="nameLengthClass(selected?.summary.name)" :title="selected?.summary.name"></h2>
               <p x-text="[selected?.summary.species, selected?.summary.classes].filter(Boolean).join(' / ')"></p>
               <div class="class-icon-row" x-show="classIconEntries().length">
                 <template x-for="entry in classIconEntries()" :key="entry.id">
@@ -216,8 +252,13 @@
       </div>
     </section>
 
-    <div class="reference-backdrop" x-show="activeReference()" x-on:click="closeReference()" x-cloak></div>
-    <aside class="reference-panel" x-show="activeReference()" role="dialog" aria-modal="true" :aria-label="activeReference()?.name || t('referenceDetails')" x-cloak>
+    <div class="reference-backdrop" x-show="activeReference()" x-on:click="closeReference()" x-cloak
+      x-transition:enter="bd-enter" x-transition:enter-start="bd-enter-start" x-transition:enter-end="bd-enter-end"
+      x-transition:leave="bd-leave" x-transition:leave-start="bd-leave-start" x-transition:leave-end="bd-leave-end"></div>
+    <aside class="reference-panel" x-show="activeReference()" role="dialog" aria-modal="true" :aria-label="activeReference()?.name || t('referenceDetails')" x-cloak
+      x-transition:enter="ref-enter" x-transition:enter-start="ref-enter-start" x-transition:enter-end="ref-enter-end"
+      x-transition:leave="ref-leave" x-transition:leave-start="ref-leave-start" x-transition:leave-end="ref-leave-end">
+      <div class="reference-grab" aria-hidden="true"></div>
       <header class="reference-head">
         <div>
           <span x-text="t('referenceDetails')">Reference Details</span>

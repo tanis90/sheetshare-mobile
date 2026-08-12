@@ -401,10 +401,6 @@ window.characterSheetViewer = function characterSheetViewer() {
       await this.tryCachedUnlock();
     },
 
-    filteredActors() {
-      return [];
-    },
-
     async unlock() {
       this.unlockError = "";
       if (!this.password) {
@@ -631,10 +627,6 @@ window.characterSheetViewer = function characterSheetViewer() {
       return facts.map(fact => `
         <span class="pill">${escapeHtml(fact.label)} ${escapeHtml(fact.value)}</span>
       `).join("");
-    },
-
-    questPanelUrl() {
-      return questPanelUrl();
     },
 
     initials(name) {
@@ -928,12 +920,6 @@ function getResourceAvailable(resource) {
 function getResourceMax(resource) {
   const max = Number(resource?.max);
   return Number.isFinite(max) ? Math.max(max, 0) : 0;
-}
-
-function questPanelUrl() {
-  const productionUrl = "https://autofvtt.criticalrole.top/quest/quests/";
-  if (["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)) return productionUrl;
-  return new URL("/quest/quests/", window.location.origin).href;
 }
 
 function escapeHtml(value) {

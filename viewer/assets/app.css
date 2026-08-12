@@ -143,28 +143,11 @@ img {
   opacity: 0.68;
 }
 
-.toolbar,
 .filters {
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
   margin-bottom: 10px;
-}
-
-.cross-link-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 0 12px;
-  background: var(--surface);
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 900;
-  text-decoration: none;
-  white-space: nowrap;
 }
 
 .search {
@@ -177,28 +160,6 @@ img {
   color: var(--text);
 }
 
-.character-list {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-}
-
-.character-card {
-  display: grid;
-  grid-template-columns: 58px 1fr;
-  gap: 12px;
-  width: 100%;
-  min-height: 96px;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-  color: inherit;
-  text-align: left;
-}
-
-.avatar,
 .portrait {
   display: grid;
   place-items: center;
@@ -209,41 +170,10 @@ img {
   font-weight: 900;
 }
 
-.avatar {
-  width: 58px;
-  height: 58px;
-  font-size: 22px;
-}
-
-.avatar img,
 .portrait img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.card-body {
-  min-width: 0;
-}
-
-.card-title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.card-title-row h2 {
-  margin: 0;
-  overflow-wrap: anywhere;
-  font-size: 17px;
-  font-weight: 900;
-}
-
-.card-body p {
-  margin: 2px 0 0;
-  color: var(--muted);
-  font-size: 13px;
 }
 
 .pill-row {
@@ -265,11 +195,6 @@ img {
   font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
-}
-
-.pill.muted {
-  color: var(--muted);
-  font-weight: 700;
 }
 
 .detail-shell {
@@ -348,15 +273,6 @@ img {
   margin-top: 2px;
   overflow-wrap: anywhere;
   font-size: 19px;
-  line-height: 1.1;
-}
-
-.stat-tile-long strong {
-  margin-top: 4px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 16px;
   line-height: 1.1;
 }
 
@@ -891,15 +807,6 @@ summary {
     padding: 18px;
   }
 
-  .character-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .list-toolbar {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-  }
-
   .detail-shell {
     grid-template-columns: 310px 1fr;
     align-items: start;
@@ -989,7 +896,6 @@ body::after {
 
 .brand p,
 .identity p,
-.card-body p,
 .hp-panel p,
 .line-meta,
 .detail-meta,
@@ -998,7 +904,6 @@ body::after {
 }
 
 .ghost-button,
-.cross-link-button,
 .search,
 .segmented button,
 .tab {
@@ -1010,14 +915,12 @@ body::after {
 }
 
 .ghost-button:hover,
-.cross-link-button:hover,
 .segmented button:hover,
 .tab:hover {
   border-color: rgba(199, 164, 108, 0.58);
   color: #f0dfbd;
 }
 
-.character-card,
 .hp-panel,
 .spell-slot-panel,
 .special-resource-panel,
@@ -1034,12 +937,6 @@ details,
   box-shadow: var(--shadow);
 }
 
-.character-card {
-  position: relative;
-  overflow: hidden;
-}
-
-.character-card::before,
 details::before {
   content: "";
   position: absolute;
@@ -1051,14 +948,6 @@ details::before {
   opacity: 0.62;
 }
 
-.character-card:hover {
-  border-color: rgba(165, 42, 47, 0.72);
-  background:
-    linear-gradient(180deg, rgba(43, 20, 19, 0.72), rgba(9, 7, 7, 0.66)),
-    radial-gradient(ellipse at 0% 0%, rgba(165, 42, 47, 0.16), transparent 52%);
-}
-
-.avatar,
 .portrait {
   border: 1px solid rgba(199, 164, 108, 0.28);
   background:
@@ -1074,24 +963,12 @@ details::before {
   color: var(--warn);
 }
 
-.pill.muted {
-  color: #7f8990;
-}
-
 .stat-tile span,
 .ability span,
 .ability small,
-.journal-like-label {
-  color: #7f8990;
-}
 
 .stat-tile strong,
 .ability strong,
-.journal-stat-value {
-  color: var(--warn);
-  font-family: "Cinzel Decorative", Cinzel, "Noto Serif SC", serif;
-  text-shadow: 0 0 18px rgba(199, 164, 108, 0.18);
-}
 
 .hp-track {
   background: rgba(5, 5, 5, 0.68);
@@ -1310,7 +1187,6 @@ summary {
     padding: 14px 16px 24px;
   }
 }
-
 
 /* Class icons in the identity block. Multiclass characters show one badge per class. */
 .class-icon-row {

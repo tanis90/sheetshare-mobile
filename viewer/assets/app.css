@@ -1310,3 +1310,43 @@ summary {
     padding: 14px 16px 24px;
   }
 }
+
+
+/* Class icons in the identity block. Multiclass characters show one badge per class. */
+.class-icon-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.class-icon {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.class-icon img {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 10px rgba(199, 164, 108, 0.22));
+}
+
+.class-icon em {
+  position: absolute;
+  right: -6px;
+  bottom: -5px;
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  border: 1px solid rgba(199, 164, 108, 0.62);
+  border-radius: 999px;
+  padding: 0 4px;
+  background: #150f0c;
+  color: var(--warn);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1;
+}

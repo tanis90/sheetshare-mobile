@@ -58,6 +58,7 @@ export async function extractCharacterSnapshot(actor) {
       portrait: normalizeAssetPath(actor.img),
       species: resolveSpecies(details, items, translations),
       classes: summarizeClasses(actor, translations),
+      classList: summarizeClassList(actor, translations),
       alignment: details.alignment || "",
       level: summarizeLevel(actor),
       xp: details.xp?.value ?? "",
@@ -589,6 +590,29 @@ function summarizeClasses(actor, translations = null) {
     .map(c => `${translateItemName(c, translations)} ${c.system?.levels ?? ""}`.trim())
     .join(" / ");
 }
+
+function summarizeClassList(actor, translations = null) {
+  return getActorItems(actor)
+    .filter(i => i.type === "class")
+    .sort(sortDocuments)
+    .map(c => ({
+      id: classIconId(c),
+      name: displayText(translateItemName(c, translations)),
+      levels: Number(c.system?.levels ?? 0) || ""
+    }));
+}
+
+function classIconId(classItem) {
+  const identifier = String(classItem.system?.identifier || "").toLowerCase().trim();
+  if (identifier) return identifier;
+  const slug = String(classItem.name || "").toLowerCase().replace(/[^a-z]+/g, "");
+  return CLASS_ICON_IDS.has(slug) ? slug : "";
+}
+
+const CLASS_ICON_IDS = new Set([
+  "artificer", "barbarian", "bard", "cleric", "druid", "fighter", "monk",
+  "paladin", "ranger", "rogue", "sorcerer", "warlock", "wizard"
+]);
 
 function summarizeLevel(actor) {
   const classes = getActorItems(actor).filter(i => i.type === "class");

@@ -12,10 +12,10 @@
   <main class="app" x-data="characterSheetViewer()" x-init="init()" x-on:keydown.escape.window="closeReference()" x-cloak>
     <header class="topbar">
       <div class="brand">
-        <h1 x-text="selected ? selected.summary.name : t('brand')">SheetShare Mobile</h1>
-        <p x-text="selected ? selected.summary.classes : worldTitle">Loading</p>
+        <h1 x-text="t('brand')">SheetShare Mobile</h1>
+        <p x-text="worldTitle"></p>
       </div>
-      <button class="ghost-button" type="button" x-show="selected && needsPassword" x-on:click="showList()" x-text="t('lock')">Lock</button>
+      <button class="ghost-button" type="button" x-show="selected && !externalAuth" x-on:click="showList()" x-text="t('lock')">Lock</button>
     </header>
 
     <section class="screen" x-show="error">
@@ -54,6 +54,14 @@
             <div>
               <h2 x-text="selected?.summary.name"></h2>
               <p x-text="[selected?.summary.species, selected?.summary.classes].filter(Boolean).join(' / ')"></p>
+              <div class="class-icon-row" x-show="classIconEntries().length">
+                <template x-for="entry in classIconEntries()" :key="entry.id">
+                  <span class="class-icon" :title="entry.name">
+                    <img :src="entry.icon" :alt="entry.name" loading="lazy" width="40" height="40">
+                    <em x-show="entry.levels !== ''" x-text="entry.levels"></em>
+                  </span>
+                </template>
+              </div>
               <div class="pill-row">
                 <span class="pill" x-text="formatUpdated(selected?.exportedAt)"></span>
               </div>

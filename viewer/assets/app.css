@@ -1,18 +1,4 @@
-:root {
-  color-scheme: light;
-  --bg: #f6f7f4;
-  --surface: #fff;
-  --surface-2: #eef1ed;
-  --line: #d9ded6;
-  --text: #18201c;
-  --muted: #627067;
-  --accent: #9f2f3f;
-  --accent-2: #286b5f;
-  --warn: #a86422;
-  --danger: #9a3030;
-  --shadow: 0 10px 24px rgba(22, 30, 26, 0.08);
-  font-family: Inter, "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
-}
+/* Base layout lives in the first section; the dark theme below defines all colors. */
 
 * {
   box-sizing: border-box;
@@ -74,7 +60,7 @@ img {
   margin: 0;
   overflow-wrap: anywhere;
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: 0;
 }
 
@@ -135,7 +121,7 @@ img {
   border-radius: 6px;
   background: var(--accent);
   color: #fff;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .primary-button:disabled {
@@ -167,7 +153,7 @@ img {
   border-radius: 8px;
   background: linear-gradient(135deg, #eff3f1, #dfe7e2);
   color: var(--accent);
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .portrait img {
@@ -193,7 +179,7 @@ img {
   background: var(--surface-2);
   color: var(--text);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -265,7 +251,7 @@ img {
   display: block;
   color: var(--muted);
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .stat-tile strong {
@@ -365,7 +351,7 @@ img {
 .special-resource-head h3 {
   margin: 0;
   font-size: 16px;
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: 0;
 }
 
@@ -373,7 +359,7 @@ img {
 .special-resource-head span {
   color: var(--muted);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -398,13 +384,13 @@ img {
 
 .spell-slot-label strong {
   font-size: 15px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .spell-slot-label span {
   color: var(--muted);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .spell-slot-cells {
@@ -463,7 +449,7 @@ img {
   min-width: 0;
   overflow-wrap: anywhere;
   font-size: 14px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .resource-count {
@@ -478,7 +464,7 @@ img {
   background: rgba(199, 164, 108, 0.08);
   color: var(--warn);
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
   white-space: nowrap;
@@ -494,7 +480,7 @@ img {
   margin: 7px 0 0;
   color: var(--muted);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .tabs {
@@ -522,7 +508,7 @@ img {
   background: var(--surface);
   color: var(--text);
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 700;
   min-width: 0;
   white-space: nowrap;
 }
@@ -558,7 +544,7 @@ img {
 .panel-head h3 {
   margin: 0;
   font-size: 15px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .panel-body {
@@ -585,7 +571,7 @@ img {
   display: block;
   color: var(--muted);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .ability strong {
@@ -610,13 +596,13 @@ img {
 .line-name {
   min-width: 0;
   overflow-wrap: anywhere;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .line-meta {
   color: var(--muted);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 600;
   text-align: right;
   white-space: nowrap;
 }
@@ -636,7 +622,7 @@ img {
   background: var(--surface);
   color: var(--text);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -660,14 +646,14 @@ summary {
   min-height: 44px;
   padding: 10px;
   cursor: pointer;
-  font-weight: 900;
+  font-weight: 700;
   overflow-wrap: anywhere;
 }
 
 .detail-meta {
   color: var(--muted);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .detail-copy {
@@ -687,7 +673,7 @@ summary {
   background: rgba(159, 47, 63, 0.08);
   color: var(--accent);
   font: inherit;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.35;
   cursor: pointer;
   vertical-align: baseline;
@@ -736,7 +722,7 @@ summary {
 .reference-head p {
   color: var(--muted);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .reference-head h2 {
@@ -760,7 +746,7 @@ summary {
   background: var(--surface-2);
   color: var(--text);
   font-size: 20px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1;
   cursor: pointer;
 }
@@ -837,7 +823,7 @@ summary {
   --warn: #c7a46c;
   --danger: #b51b22;
   --shadow: 0 22px 60px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(215, 196, 165, 0.06);
-  font-family: Caudex, "Noto Serif SC", Georgia, serif;
+  font-family: Caudex, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
 }
 
 body {
@@ -890,7 +876,7 @@ body::after {
 .special-resource-head h3,
 .empty-state strong {
   color: #ead7b8;
-  font-family: "Cinzel Decorative", Cinzel, "Noto Serif SC", serif;
+  font-family: "Cinzel Decorative", Cinzel, "Noto Serif SC", "Songti SC", serif;
   text-shadow: 0 4px 22px rgba(0, 0, 0, 0.5);
 }
 
@@ -1039,7 +1025,7 @@ details::before {
 }
 
 .tab {
-  font-family: "Cinzel Decorative", Cinzel, "Noto Serif SC", serif;
+  font-family: "Cinzel Decorative", Cinzel, "Noto Serif SC", "Songti SC", serif;
   color: #7f8990;
 }
 
@@ -1090,7 +1076,7 @@ summary {
 .reference-copy h3,
 .reference-copy h4 {
   color: var(--warn);
-  font-family: "Cinzel Decorative", Cinzel, "Noto Serif SC", serif;
+  font-family: "Cinzel Decorative", Cinzel, "Noto Serif SC", "Songti SC", serif;
 }
 
 .inline-ref {
@@ -1223,6 +1209,6 @@ summary {
   color: var(--warn);
   font-size: 11px;
   font-style: normal;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1;
 }

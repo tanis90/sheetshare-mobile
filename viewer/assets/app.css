@@ -303,15 +303,6 @@ img {
   background: #8f1d22;
 }
 
-.hp-wounded .hp-fill {
-  background: #8f1d22;
-}
-
-.hp-critical .hp-fill,
-.hp-down .hp-fill {
-  background: #8f1d22;
-}
-
 .temp-hp-block {
   margin-top: 8px;
 }
@@ -403,25 +394,14 @@ img {
 .spell-slot-cell {
   width: 28px;
   aspect-ratio: 1;
-  border: 1px solid rgba(178, 129, 70, 0.84);
-  border-radius: 5px;
-  background:
-    radial-gradient(circle at 35% 28%, rgba(255, 244, 204, 0.78), transparent 18%),
-    linear-gradient(145deg, #e6c27a, #a46638 52%, #70242b);
-  box-shadow:
-    0 0 14px rgba(159, 47, 63, 0.28),
-    inset 0 1px 0 rgba(255, 244, 204, 0.4),
-    inset 0 -2px 8px rgba(57, 14, 18, 0.44);
+  border: 1px solid rgba(199, 164, 108, 0.75);
+  border-radius: 6px;
+  background: #8f1d22;
 }
 
 .spell-slot-cell.spent {
-  border-color: rgba(87, 104, 120, 0.72);
-  background:
-    linear-gradient(145deg, rgba(31, 42, 52, 0.88), rgba(8, 12, 18, 0.94));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    inset 0 -2px 8px rgba(0, 0, 0, 0.5);
-  opacity: 0.72;
+  border-color: rgba(107, 97, 89, 0.4);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .resource-list {
@@ -473,7 +453,7 @@ img {
 .resource-count.empty {
   border-color: rgba(75, 89, 102, 0.72);
   background: rgba(15, 18, 22, 0.64);
-  color: #7f8990;
+  color: #8f9aa2;
 }
 
 .resource-card p {
@@ -949,12 +929,26 @@ details::before {
   color: var(--warn);
 }
 
+.pill.pill-muted {
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 500;
+  padding: 0;
+}
+
 .stat-tile span,
 .ability span,
-.ability small,
+.ability small {
+  color: #9aa5ad;
+}
 
 .stat-tile strong,
-.ability strong,
+.ability strong {
+  color: var(--warn);
+  font-family: "Cinzel Decorative", Cinzel, "Noto Serif SC", "Songti SC", serif;
+  text-shadow: 0 0 18px rgba(199, 164, 108, 0.18);
+}
 
 .hp-track {
   background: rgba(5, 5, 5, 0.68);
@@ -966,12 +960,18 @@ details::before {
 }
 
 .hp-wounded .hp-fill {
-  background: #8f1d22;
+  background: #b57a2e;
+  box-shadow: 0 0 16px rgba(181, 122, 46, 0.3);
 }
 
-.hp-critical .hp-fill,
+.hp-critical .hp-fill {
+  background: #d43a2f;
+  box-shadow: 0 0 18px rgba(212, 58, 47, 0.42);
+}
+
 .hp-down .hp-fill {
-  background: #8f1d22;
+  background: #4a2025;
+  box-shadow: none;
 }
 
 .hp-temp-track {
@@ -985,27 +985,6 @@ details::before {
 
 .spell-slot-row {
   border-top-color: rgba(107, 97, 89, 0.34);
-}
-
-.spell-slot-cell {
-  border-color: rgba(199, 164, 108, 0.82);
-  background:
-    radial-gradient(circle at 35% 28%, rgba(255, 238, 190, 0.78), transparent 18%),
-    linear-gradient(145deg, #d8b16d, #8f1d22 62%, #25110f);
-  box-shadow:
-    0 0 16px rgba(143, 29, 34, 0.36),
-    0 0 8px rgba(199, 164, 108, 0.18),
-    inset 0 1px 0 rgba(255, 238, 190, 0.34),
-    inset 0 -2px 8px rgba(0, 0, 0, 0.48);
-}
-
-.spell-slot-cell.spent {
-  border-color: rgba(75, 89, 102, 0.78);
-  background:
-    linear-gradient(145deg, rgba(29, 35, 43, 0.92), rgba(6, 8, 13, 0.96));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    inset 0 -2px 8px rgba(0, 0, 0, 0.52);
 }
 
 .resource-card {
@@ -1026,7 +1005,7 @@ details::before {
 
 .tab {
   font-family: "Cinzel Decorative", Cinzel, "Noto Serif SC", "Songti SC", serif;
-  color: #7f8990;
+  color: #9aa5ad;
 }
 
 .tab.active,

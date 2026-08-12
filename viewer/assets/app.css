@@ -174,6 +174,22 @@ img {
   margin-top: 8px;
 }
 
+.trait-groups {
+  display: grid;
+  gap: 12px;
+}
+
+.trait-group .pill-row {
+  margin-top: 4px;
+}
+
+.trait-group-label {
+  display: block;
+  color: #9aa5ad;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .pill {
   display: inline-flex;
   align-items: center;

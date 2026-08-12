@@ -169,12 +169,14 @@
 
             <div x-html="listPanelHtml(t('saves'), selected?.details.saves, 'value', 'ability', true)"></div>
             <div x-html="listPanelHtml(t('skills'), selected?.details.skills, 'mod', 'skill', true)"></div>
-            <div x-html="traitPanelHtml(t('damageResistances'), selected?.details.traits.damageResistances)"></div>
-            <div x-html="traitPanelHtml(t('damageImmunities'), selected?.details.traits.damageImmunities)"></div>
-            <div x-html="traitPanelHtml(t('damageVulnerabilities'), selected?.details.traits.damageVulnerabilities)"></div>
-            <div x-html="traitPanelHtml(t('conditionImmunities'), selected?.details.traits.conditionImmunities)"></div>
-            <div x-html="traitPanelHtml(t('languages'), selected?.details.traits.languages)"></div>
-            <div x-html="traitPanelHtml(t('senses'), selected?.details.traits.senses)"></div>
+            <div x-html="traitsPanelHtml([
+              { title: t('damageResistances'), items: selected?.details.traits.damageResistances },
+              { title: t('damageImmunities'), items: selected?.details.traits.damageImmunities },
+              { title: t('damageVulnerabilities'), items: selected?.details.traits.damageVulnerabilities },
+              { title: t('conditionImmunities'), items: selected?.details.traits.conditionImmunities },
+              { title: t('languages'), items: selected?.details.traits.languages },
+              { title: t('senses'), items: selected?.details.traits.senses }
+            ])"></div>
           </section>
 
           <section x-show="tab === 'spells'">

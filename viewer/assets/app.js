@@ -70,6 +70,7 @@ const VIEWER_I18N = {
     damageVulnerabilities: "Damage Vulnerabilities",
     conditionImmunities: "Condition Immunities",
     passivePerception: "Passive",
+    traitsTitle: "Traits & Senses",
     hp: "Hit Points",
     tempHpLabel: "Temp HP",
     tempHp: "Temp HP {value}",
@@ -194,6 +195,7 @@ const VIEWER_I18N = {
     damageVulnerabilities: "伤害易伤",
     conditionImmunities: "状态免疫",
     passivePerception: "被动察觉",
+    traitsTitle: "特质与感官",
     hp: "生命值",
     tempHpLabel: "临时生命",
     tempHp: "临时生命 {value}",
@@ -701,14 +703,19 @@ window.characterSheetViewer = function characterSheetViewer() {
       `;
     },
 
-    traitPanelHtml(title, items) {
-      const safeItems = items ?? [];
-      if (!safeItems.length) return "";
+    traitsPanelHtml(groups) {
+      const safeGroups = (groups ?? []).filter(group => (group?.items ?? []).length);
+      if (!safeGroups.length) return "";
       return `
         <div class="panel">
-          <div class="panel-head"><h3>${escapeHtml(title)}</h3></div>
-          <div class="panel-body">
-            <div class="pill-row">${safeItems.map(item => `<span class="pill">${escapeHtml(item)}</span>`).join("")}</div>
+          <div class="panel-head"><h3>${escapeHtml(t("traitsTitle"))}</h3></div>
+          <div class="panel-body trait-groups">
+            ${safeGroups.map(group => `
+              <div class="trait-group">
+                <span class="trait-group-label">${escapeHtml(group.title)}</span>
+                <div class="pill-row">${group.items.map(item => `<span class="pill">${escapeHtml(item)}</span>`).join("")}</div>
+              </div>
+            `).join("")}
           </div>
         </div>
       `;

@@ -85,6 +85,7 @@ const VIEWER_I18N = {
     attributes: "Attributes",
     saves: "Saving Throws",
     skills: "Skills",
+    skillsOther: "Other",
     languages: "Languages",
     senses: "Senses",
     searchSpells: "Search spells",
@@ -212,6 +213,7 @@ const VIEWER_I18N = {
     attributes: "属性",
     saves: "豁免",
     skills: "技能",
+    skillsOther: "其他",
     languages: "语言",
     senses: "感官",
     searchSpells: "搜索法术",
@@ -262,6 +264,17 @@ const CLASS_ICON_IDS = new Set([
   "artificer", "barbarian", "bard", "cleric", "druid", "fighter", "monk",
   "paladin", "ranger", "rogue", "sorcerer", "warlock", "wizard"
 ]);
+
+// Skill -> governing ability, fixed by the D&D 5e rules. Kept in the viewer so
+// that snapshots without a per-skill ability field still group correctly.
+const SKILL_ABILITY = {
+  ath: "str",
+  acr: "dex", slt: "dex", ste: "dex",
+  arc: "int", his: "int", inv: "int", nat: "int", rel: "int",
+  ani: "wis", ins: "wis", med: "wis", prc: "wis", sur: "wis",
+  dec: "cha", itm: "cha", prf: "cha", per: "cha"
+};
+const SKILL_GROUP_ORDER = ["str", "dex", "int", "wis", "cha"];
 
 let activeLanguage = resolveInitialLanguage();
 applyDocumentLanguage(activeLanguage);
@@ -739,6 +752,46 @@ window.characterSheetViewer = function characterSheetViewer() {
               <div class="trait-group">
                 <span class="trait-group-label">${escapeHtml(group.title)}</span>
                 <div class="pill-row">${group.items.map(item => `<span class="pill">${escapeHtml(item)}</span>`).join("")}</div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    },
+
+    // Skills are grouped by their governing ability (fixed 5e mapping) so the
+    // panel reads like a paper sheet; unproficient (+0) rows stay visible.
+    skillsPanelHtml(rows) {
+      const safeRows = rows ?? [];
+      if (!safeRows.length) return "";
+      const sortByLabel = (a, b) => localizedSkillLabel(a).localeCompare(localizedSkillLabel(b), activeLanguage);
+      const groups = SKILL_GROUP_ORDER
+        .map(ability => ({
+          ability,
+          items: safeRows
+            .filter(row => SKILL_ABILITY[String(row?.key || "").toLowerCase()] === ability)
+            .sort(sortByLabel)
+        }))
+        .filter(group => group.items.length);
+      const unknown = safeRows
+        .filter(row => !SKILL_ABILITY[String(row?.key || "").toLowerCase()])
+        .sort(sortByLabel);
+      if (unknown.length) groups.push({ ability: "", items: unknown });
+      return `
+        <div class="panel">
+          <div class="panel-head"><h3>${escapeHtml(t("skills"))}</h3></div>
+          <div class="panel-body skill-groups">
+            ${groups.map(group => `
+              <div class="skill-group">
+                <span class="trait-group-label">${escapeHtml(group.ability ? t(`abilities.${group.ability}`) : t("skillsOther"))}</span>
+                <div class="compact-list two-col">
+                  ${group.items.map(row => `
+                    <div class="line-item${row.proficiency && row.proficiency !== "none" ? " proficient" : ""}">
+                      <span class="line-name">${escapeHtml(localizedSkillLabel(row))}</span>
+                      <span class="line-meta">${escapeHtml(row.mod ?? row.value ?? "")}</span>
+                    </div>
+                  `).join("")}
+                </div>
               </div>
             `).join("")}
           </div>

@@ -10,8 +10,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Caudex:wght@400;700&family=Noto+Serif+SC:wght@700&family=Noto+Sans+SC:wght@400;500;700&display=swap">
-  <link rel="stylesheet" href="assets/app.css?v=0.2.2-ui">
-  <script defer src="assets/app.js?v=0.2.2-ui"></script>
+  <link rel="stylesheet" href="assets/app.css?v=0.2.3-ui">
+  <script defer src="assets/app.js?v=0.2.3-ui"></script>
   <script defer src="assets/alpine.min.js"></script>
 </head>
 <body>
@@ -204,7 +204,7 @@
             </div>
 
             <div x-html="listPanelHtml(t('saves'), selected?.details.saves, 'value', 'ability', true)"></div>
-            <div x-html="listPanelHtml(t('skills'), selected?.details.skills, 'mod', 'skill', true)"></div>
+            <div x-html="skillsPanelHtml(selected?.details.skills)"></div>
             <div x-html="traitsPanelHtml([
               { title: t('damageResistances'), items: selected?.details.traits.damageResistances },
               { title: t('damageImmunities'), items: selected?.details.traits.damageImmunities },

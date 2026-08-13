@@ -73,9 +73,9 @@ jobs:
           set -euo pipefail
           rm -rf dist
           mkdir -p dist/package
-          git archive --format=tar HEAD | tar -x -C dist/package
-          rm -rf dist/package/.github dist/package/dist dist/package/tests
-          rm -f dist/package/package.json
+          git archive --format=tar HEAD module.json languages scripts styles viewer | tar -x -C dist/package
+          rm -rf dist/package/scripts/tools
+          find dist/package/scripts -type f -name '*.test.mjs' -delete
 
           node --input-type=commonjs <<'NODE'
           const fs = require("fs");
@@ -117,7 +117,9 @@ jobs:
           const fs = require("fs");
 
           async function main() {
-            const token = process.env.FOUNDRY_PACKAGE_TOKEN;
+            const token = String(process.env.FOUNDRY_PACKAGE_TOKEN || "")
+              .replace(/^\uFEFF/, "")
+              .trim();
             if (!token) {
               throw new Error("Missing GitHub Actions secret: FOUNDRY_PACKAGE_TOKEN");
             }

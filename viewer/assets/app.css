@@ -258,18 +258,22 @@ img {
   gap: 8px;
 }
 
-/* Groups with ≤2 skills render as a full-width strip above the card grid:
-   ability name + modifier, a divider, then the skills laid out in a row. */
+/* Groups with ≤2 skills render as a full-width strip above the card grid. */
 .skill-strips {
   display: grid;
   gap: 8px;
   margin-bottom: 8px;
 }
 
+/* A strip mirrors the 2-column card grid below it: the ability head occupies
+   the left column, its skills the right column, so the text edges line up
+   with the cards underneath. */
 .skill-strip {
-  display: flex;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 8px 10px;
@@ -279,7 +283,9 @@ img {
 .skill-strip-head {
   display: flex;
   align-items: baseline;
+  justify-content: space-between;
   gap: 8px;
+  padding-right: 10px;
   color: var(--text);
   font-size: 16px;
   font-weight: 700;
@@ -291,20 +297,26 @@ img {
 }
 
 .skill-strip-divider {
-  align-self: stretch;
+  position: absolute;
+  top: 7px;
+  bottom: 7px;
+  left: 50%;
   width: 1px;
   background: var(--line);
 }
 
 .skill-strip-rows {
   display: flex;
-  flex: 1;
   flex-wrap: wrap;
   gap: 2px 18px;
+  padding-left: 10px;
 }
 
+/* Each skill in a strip fills the right column, name on the left and modifier
+   on the right — same rhythm as the card rows. */
 .skill-strip-rows .skill-row {
-  justify-content: flex-start;
+  flex: 1;
+  justify-content: space-between;
 }
 
 .skill-group {

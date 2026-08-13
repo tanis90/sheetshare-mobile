@@ -273,14 +273,14 @@ img {
   margin-bottom: 4px;
   padding-bottom: 4px;
   border-bottom: 1px solid var(--line);
-  color: #9aa5ad;
-  font-size: 12px;
-  font-weight: 600;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .skill-group-head strong {
   color: var(--warn);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .skill-rows {

@@ -269,7 +269,6 @@ img {
    the left column, its skills the right column, so the text edges line up
    with the cards underneath. */
 .skill-strip {
-  position: relative;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
@@ -294,15 +293,6 @@ img {
 .skill-strip-head strong {
   color: var(--warn);
   font-size: 14px;
-}
-
-.skill-strip-divider {
-  position: absolute;
-  top: 7px;
-  bottom: 7px;
-  left: 50%;
-  width: 1px;
-  background: var(--line);
 }
 
 .skill-strip-rows {

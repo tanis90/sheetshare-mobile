@@ -777,7 +777,6 @@ window.characterSheetViewer = function characterSheetViewer() {
               ${strips.map(group => `
                 <section class="skill-strip">
                   <header class="skill-strip-head">${headHtml(group)}</header>
-                  <span class="skill-strip-divider" aria-hidden="true"></span>
                   <div class="skill-strip-rows">${group.items.map(rowHtml).join("")}</div>
                 </section>
               `).join("")}

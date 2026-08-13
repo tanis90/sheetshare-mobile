@@ -262,7 +262,7 @@ img {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 8px 10px;
-  background: var(--surface-2);
+  background: transparent;
 }
 
 .skill-group-head {

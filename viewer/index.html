@@ -10,8 +10,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Caudex:wght@400;700&family=Noto+Serif+SC:wght@700&family=Noto+Sans+SC:wght@400;500;700&display=swap">
-  <link rel="stylesheet" href="assets/app.css?v=0.2.1-ui">
-  <script defer src="assets/app.js?v=0.2.1-ui"></script>
+  <link rel="stylesheet" href="assets/app.css?v=0.2.2-ui">
+  <script defer src="assets/app.js?v=0.2.2-ui"></script>
   <script defer src="assets/alpine.min.js"></script>
 </head>
 <body>
@@ -113,7 +113,7 @@
           <section class="stat-grid">
             <div class="stat-tile"><span>AC</span><strong x-text="selected?.summary.ac || '-'"></strong></div>
             <div class="stat-tile"><span x-text="t('initiative')">Initiative</span><strong x-text="selected?.summary.initiative || '-'"></strong></div>
-            <div class="stat-tile"><span x-text="t('speed')">Speed</span><strong :class="{ long: String(selected?.summary.speed || '').length > 10 }" x-text="selected?.summary.speed || '-'"></strong></div>
+            <div class="stat-tile"><span x-text="t('speed')">Speed</span><strong x-text="speedShort(selected?.summary.speed)" :title="selected?.summary.speed"></strong></div>
             <div class="stat-tile"><span x-text="t('proficiency')">Proficiency</span><strong x-text="selected?.summary.proficiencyBonus || '-'"></strong></div>
           </section>
 

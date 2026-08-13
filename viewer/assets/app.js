@@ -644,6 +644,15 @@ window.characterSheetViewer = function characterSheetViewer() {
       return text.split(/\s+/).map(part => part[0]).slice(0, 2).join("").toUpperCase();
     },
 
+    // The speed tile must stay the same height as its neighbours, so the grid
+    // shows just the number; the full text (e.g. movement type) goes to title.
+    speedShort(speed) {
+      const text = String(speed || "").trim();
+      if (!text) return "-";
+      const match = text.match(/\d+(?:\.\d+)?/);
+      return match ? match[0] : text;
+    },
+
     // Long names wrap badly in the identity block; shrink the font in two steps.
     // CJK glyphs count double because they take roughly twice the width.
     nameLengthClass(name) {

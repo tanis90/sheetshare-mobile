@@ -358,12 +358,6 @@ img {
   line-height: 1.1;
 }
 
-.stat-tile strong.long {
-  font-size: 14px;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-}
-
 .hp-panel,
 .spell-slot-panel,
 .special-resource-panel,

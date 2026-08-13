@@ -294,13 +294,13 @@ img {
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
-  font-size: 13px;
   line-height: 1.5;
 }
 
 .skill-row .skill-name {
   min-width: 0;
   overflow-wrap: anywhere;
+  font-weight: 600;
 }
 
 .skill-row .skill-mod {
@@ -308,6 +308,7 @@ img {
   align-items: center;
   gap: 5px;
   color: var(--muted);
+  font-size: 12px;
   font-weight: 600;
 }
 

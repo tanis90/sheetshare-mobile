@@ -299,7 +299,6 @@ img {
 .skill-row .skill-name {
   min-width: 0;
   overflow-wrap: anywhere;
-  font-weight: 600;
 }
 
 .skill-row .skill-mod {
@@ -1116,6 +1115,7 @@ body::after {
 .panel-head h3,
 .spell-slot-head h3,
 .special-resource-head h3,
+.skill-group-head span,
 .empty-state strong {
   color: #ead7b8;
   font-family: "Cinzel Decorative", Cinzel, "Noto Serif SC", "Songti SC", serif;

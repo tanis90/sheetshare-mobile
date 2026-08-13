@@ -259,7 +259,6 @@ img {
 }
 
 .skill-group {
-  align-self: start;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 8px 10px;
@@ -334,9 +333,12 @@ img {
   background: var(--warn);
 }
 
+/* Expertise = double proficiency, shown as two dots: more dots, more skilled. */
 .skill-row.prof-expertise .skill-mod::before {
+  margin-right: 9px;
+  border-radius: 50%;
   background: var(--warn);
-  transform: rotate(45deg);
+  box-shadow: 9px 0 0 var(--warn);
 }
 
 .skill-row.prof-half .skill-mod::before {

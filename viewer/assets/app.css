@@ -258,6 +258,55 @@ img {
   gap: 8px;
 }
 
+/* Groups with ≤2 skills render as a full-width strip above the card grid:
+   ability name + modifier, a divider, then the skills laid out in a row. */
+.skill-strips {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.skill-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: transparent;
+}
+
+.skill-strip-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.skill-strip-head strong {
+  color: var(--warn);
+  font-size: 14px;
+}
+
+.skill-strip-divider {
+  align-self: stretch;
+  width: 1px;
+  background: var(--line);
+}
+
+.skill-strip-rows {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 2px 18px;
+}
+
+.skill-strip-rows .skill-row {
+  justify-content: flex-start;
+}
+
 .skill-group {
   border: 1px solid var(--line);
   border-radius: 8px;

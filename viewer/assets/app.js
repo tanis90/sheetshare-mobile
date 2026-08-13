@@ -752,29 +752,45 @@ window.characterSheetViewer = function characterSheetViewer() {
         .filter(row => !SKILL_ABILITY[String(row?.key || "").toLowerCase()])
         .sort(sortByLabel);
       if (unknown.length) groups.push({ ability: "", items: unknown });
+      const headHtml = group => `
+        <span>${escapeHtml(group.ability ? t(`abilities.${group.ability}`) : t("skillsOther"))}</span>
+        <strong>${escapeHtml(abilityMod(group.ability))}</strong>`;
+      const rowHtml = row => {
+        const prof = ["half", "proficient", "expertise"].includes(row.proficiency) ? row.proficiency : "";
+        const title = prof ? ` title="${escapeHtml(t(`proficiencyLabels.${prof}`))}"` : "";
+        return `
+          <div class="skill-row${prof ? ` prof-${prof}` : ""}"${title}>
+            <span class="skill-name">${escapeHtml(localizedSkillLabel(row))}</span>
+            <span class="skill-mod">${escapeHtml(row.mod ?? row.value ?? "")}</span>
+          </div>`;
+      };
+      // Small groups (≤2 skills, in practice always STR/athletics) render as a
+      // full-width strip so the 2-column card grid packs without a hole.
+      const strips = groups.filter(group => group.items.length <= 2);
+      const cards = groups.filter(group => group.items.length > 2);
       return `
         <div class="panel">
           <div class="panel-head"><h3>${escapeHtml(t("skills"))}</h3></div>
-          <div class="panel-body skill-groups">
-            ${groups.map(group => `
-              <section class="skill-group">
-                <header class="skill-group-head">
-                  <span>${escapeHtml(group.ability ? t(`abilities.${group.ability}`) : t("skillsOther"))}</span>
-                  <strong>${escapeHtml(abilityMod(group.ability))}</strong>
-                </header>
-                <div class="skill-rows">
-                  ${group.items.map(row => {
-                    const prof = ["half", "proficient", "expertise"].includes(row.proficiency) ? row.proficiency : "";
-                    const title = prof ? ` title="${escapeHtml(t(`proficiencyLabels.${prof}`))}"` : "";
-                    return `
-                    <div class="skill-row${prof ? ` prof-${prof}` : ""}"${title}>
-                      <span class="skill-name">${escapeHtml(localizedSkillLabel(row))}</span>
-                      <span class="skill-mod">${escapeHtml(row.mod ?? row.value ?? "")}</span>
-                    </div>`;
-                  }).join("")}
-                </div>
-              </section>
-            `).join("")}
+          <div class="panel-body">
+            ${strips.length ? `
+            <div class="skill-strips">
+              ${strips.map(group => `
+                <section class="skill-strip">
+                  <header class="skill-strip-head">${headHtml(group)}</header>
+                  <span class="skill-strip-divider" aria-hidden="true"></span>
+                  <div class="skill-strip-rows">${group.items.map(rowHtml).join("")}</div>
+                </section>
+              `).join("")}
+            </div>` : ""}
+            ${cards.length ? `
+            <div class="skill-groups">
+              ${cards.map(group => `
+                <section class="skill-group">
+                  <header class="skill-group-head">${headHtml(group)}</header>
+                  <div class="skill-rows">${group.items.map(rowHtml).join("")}</div>
+                </section>
+              `).join("")}
+            </div>` : ""}
           </div>
         </div>
       `;

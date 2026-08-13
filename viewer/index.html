@@ -18,8 +18,8 @@
   <main class="app" x-data="characterSheetViewer()" x-init="init()" x-on:keydown.escape.window="closeReference()" x-cloak>
     <header class="topbar">
       <div class="brand">
-        <h1 x-text="t('brand')">SheetShare Mobile</h1>
-        <p x-text="worldTitle"></p>
+        <h1 x-text="selected?.summary.name || t('brand')">SheetShare Mobile</h1>
+        <p x-text="selected ? (selected?.summary.classes || worldTitle) : worldTitle"></p>
       </div>
       <button class="ghost-button" type="button" x-show="selected && !externalAuth" x-on:click="showList()" x-text="t('lock')">Lock</button>
     </header>

@@ -309,6 +309,11 @@ img {
   align-items: center;
   margin-bottom: 10px;
   min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
 }
 
 .identity > div {

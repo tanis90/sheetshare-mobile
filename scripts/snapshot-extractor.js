@@ -19,6 +19,9 @@ const CN_TRANSLATION_PACKS = [
   "dnd5e.backgrounds"
 ];
 const UUID_LINK_PATTERN = /@UUID\[([^\]]+)\](?:\{([^}]*)\})?/g;
+const INLINE_EMBED_PATTERN = /@Embed\[([^\]]+?)\s+inline\]/g;
+const INLINE_ROLL_PATTERN = /\[\[\s*\/r\s+([^\]]+?)\s*\]\]/gi;
+const INLINE_COMMAND_PATTERN = /\[\[\s*\/[a-z]+\s*([^\]]*?)\s*\]\]/gi;
 let cnTranslationsPromise = null;
 
 export async function extractCharacterSnapshot(actor, { portrait = "" } = {}) {
@@ -1073,8 +1076,9 @@ function hasMeaningfulUses(uses) {
 async function buildDescriptionHtml(value, references = null) {
   const html = cleanHtml(value);
   if (!html) return "";
-  const enriched = references ? await references.enrich(html) : plainTextUuidLinks(html);
-  return sanitizeHtml(enriched);
+  const normalized = normalizeInlineEmbeds(html);
+  const enriched = references ? await references.enrich(normalized) : plainTextUuidLinks(normalized);
+  return sanitizeHtml(enrichInlineRolls(enriched));
 }
 
 function createReferenceCollector(translations = null) {
@@ -1161,6 +1165,24 @@ function referenceButtonHtml(id, label) {
 
 function plainTextUuidLinks(value) {
   return cleanHtml(value).replace(uuidLinkPattern(), (_match, uuid, label) => escapeHtml(cleanReferenceLabel(label) || fallbackUuidLabel(uuid)));
+}
+
+// Foundry stores dice formulas as unrendered inline syntax ([[/r 1d6]]) and
+// inline embeds as @Embed[uuid inline]. Snapshots ship display-ready HTML, so
+// embeds are rewritten to the @UUID form (routed through the reference flow),
+// rolls become static pills, and unrecognized [[/commands]] degrade to their
+// inner text instead of leaking raw markup into the viewer.
+function normalizeInlineEmbeds(value) {
+  return String(value || "").replace(INLINE_EMBED_PATTERN, "@UUID[$1]");
+}
+
+function enrichInlineRolls(value) {
+  return String(value || "")
+    .replace(INLINE_ROLL_PATTERN, (_match, formula) => {
+      const label = escapeHtml(formula);
+      return `<span class="inline-roll" title="${escapeHtml(`[[/r ${formula}]]`)}">${label}</span>`;
+    })
+    .replace(INLINE_COMMAND_PATTERN, (_match, inner) => escapeHtml(inner));
 }
 
 function uuidLinkPattern() {

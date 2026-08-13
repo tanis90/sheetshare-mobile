@@ -16,7 +16,7 @@ SheetShare Mobile lets a GM publish a clean mobile character sheet from a Foundr
 - Optional External Auth mode for reverse-proxy or portal-protected deployments
 - No public character index
 - Device-local password memory for opened sheets
-- Auto-refresh after published actors receive `updateActor` changes
+- Auto-refresh after published actors, items, or active effects change
 - English and Simplified Chinese UI
 - Manager and Doctor panels in Foundry settings
 
@@ -66,6 +66,8 @@ Then enable **SheetShare Mobile** in the world module list.
 
 Published sheets can be refreshed from the actor sheet header or from the manager panel.
 
+The first publication assigns a stable, human-readable key in the form `<world>-<character-name>`. Unicode names remain readable (for example, `dragonlance-黎安娜-晨盾`), explicit keys are not rewritten, and a short actor-id is appended only when that readable key is already in use. Pure-Chinese actors carrying the legacy `character` fallback migrate automatically on their next refresh.
+
 After a successful unlock, the player viewer remembers that sheet on the same browser. Refreshing or reopening the link unlocks automatically until the GM republishes with a different password. Use **Lock** on shared devices to clear the saved password.
 
 ![DM publishing Wizard to mobile](docs/screenshots/dm-publish-flow.png)
@@ -73,6 +75,8 @@ After a successful unlock, the player viewer remembers that sheet on the same br
 Players open the link on a phone, unlock it with the table password, and get a mobile-first read-only sheet.
 
 If your site already protects the viewer and snapshot assets behind a portal or reverse proxy, switch **Access mode** to **External Auth / trusted portal**. In that mode the GM publishes trusted snapshots and players do not enter a SheetShare password.
+
+External Auth worlds automatically refresh published sheets when the primary GM reaches `ready`. Publication identity checks, clone/import behavior, and world-scoped portrait mirroring are documented in [Publishing lifecycle and portal media](docs/PUBLISHING-LIFECYCLE.md).
 
 ## Player Sheet Preview
 
@@ -92,7 +96,7 @@ Open **Game Settings > Configure Settings > SheetShare Mobile**.
 
 Available settings:
 
-- **Auto-refresh on actor updates**: refreshes published sheets after `updateActor` changes while a GM browser has the share password in memory.
+- **Auto-refresh published sheets**: refreshes published sheets after actor, item, or active effect changes while a GM browser has the share password in memory.
 - **Warn when sharing over HTTP**: shows a Doctor warning when the current Foundry page is not using HTTPS.
 - **Viewer language**: choose browser auto-detection, the Foundry world language, English, or Simplified Chinese.
 - **Access mode**: use password-protected encrypted snapshots, or External Auth for deployments where `/modules/sheetshare-mobile/viewer` and `/assets/sheetshare-mobile` are already protected by your portal or reverse proxy.
@@ -138,4 +142,4 @@ Release instructions are in [docs/RELEASE.md](docs/RELEASE.md).
 
 ## Current Scope
 
-The first public target focuses on the common single-GM workflow. `updateActor` auto-refresh is supported. Dedicated hooks for item, spell preparation, and active effect mutations are tracked as follow-up work after wider system testing.
+The first public target focuses on the common single-GM workflow. Published character sheets auto-refresh after actor, item, and active effect changes while a GM browser is online.

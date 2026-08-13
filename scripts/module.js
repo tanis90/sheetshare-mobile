@@ -5,6 +5,7 @@ import {
   isPublishedCharacterActor,
   openSheetShareDoctor,
   openPublishedSheetsManager,
+  refreshPublishedSnapshotsOnReady,
   registerSnapshotHooks,
   registerSnapshotSettings,
   runStorageSelfTest,
@@ -31,9 +32,14 @@ Hooks.once("ready", () => {
     getActorShareUrl,
     openSheetShareDoctor,
     openPublishedSheetsManager,
+    refreshPublishedSnapshotsOnReady,
     runStorageSelfTest,
     setActorPublished
   };
+  refreshPublishedSnapshotsOnReady().catch(error => {
+    console.error(`${MODULE_ID} | Ready refresh failed`, error);
+    notifyError(error);
+  });
 });
 
 Hooks.on("getHeaderControlsApplicationV2", (app, controls) => {

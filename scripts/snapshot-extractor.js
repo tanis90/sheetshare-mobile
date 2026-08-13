@@ -21,7 +21,7 @@ const CN_TRANSLATION_PACKS = [
 const UUID_LINK_PATTERN = /@UUID\[([^\]]+)\](?:\{([^}]*)\})?/g;
 let cnTranslationsPromise = null;
 
-export async function extractCharacterSnapshot(actor) {
+export async function extractCharacterSnapshot(actor, { portrait = "" } = {}) {
   const system = actor.system ?? {};
   const details = system.details ?? {};
   const attributes = system.attributes ?? {};
@@ -46,7 +46,7 @@ export async function extractCharacterSnapshot(actor) {
     actor: {
       name: actor.name,
       type: actor.type,
-      img: normalizeAssetPath(actor.img)
+      img: normalizeAssetPath(portrait)
     },
     access: {
       enabled: true,
@@ -55,7 +55,7 @@ export async function extractCharacterSnapshot(actor) {
     },
     summary: {
       name: actor.name,
-      portrait: normalizeAssetPath(actor.img),
+      portrait: normalizeAssetPath(portrait),
       species: resolveSpecies(details, items, translations),
       classes: summarizeClasses(actor, translations),
       classList: summarizeClassList(actor, translations),

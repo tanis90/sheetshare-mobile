@@ -1,4 +1,7 @@
 import { extractCharacterSnapshot } from "./snapshot-extractor.js";
+import { normalizeActorKeyPart, resolveActorKey } from "./actor-key.js";
+import { mirrorActorPortrait } from "./portrait-mirror.js";
+import { assertUniquePublishedIdentities } from "./publish-safety.js";
 
 export const MODULE_ID = "sheetshare-mobile";
 export const STORAGE_ROOT_NAME = "sheetshare-mobile";
@@ -13,10 +16,13 @@ const VIEWER_LANGUAGE_AUTO = "auto";
 const VIEWER_LANGUAGE_FOUNDRY = "foundry";
 const ACCESS_MODE_PASSWORD = "password";
 const ACCESS_MODE_EXTERNAL = "externalAuth";
+const LATEST_INDEX_FILENAME = "_latest.json";
+const LATEST_INDEX_SCHEMA = "sheetshare-mobile.latest-index.v1";
 const pendingExports = new Map();
 const lastHashes = new Map();
 let settingsRegistered = false;
 let hooksRegistered = false;
+let readyRefreshPromise = null;
 
 export function registerSnapshotSettings() {
   if (settingsRegistered) return;
@@ -96,11 +102,25 @@ export function registerSnapshotHooks() {
   });
 
   Hooks.on("updateActor", (actor) => {
-    if (!shouldExportFromThisClient()) return;
-    if (!game.settings.get(MODULE_ID, AUTO_EXPORT_SETTING)) return;
-    if (!isPublishedCharacterActor(actor)) return;
-    scheduleActorExport(actor);
+    if (!shouldAutoExportActor(actor)) return;
+    scheduleActorExport(actor, 1000, "updateActor");
   });
+
+  Hooks.on("createActor", actor => {
+    if (!shouldExportFromThisClient()) return;
+    clearInheritedPublishFlag(actor).catch(error => {
+      console.error(`${MODULE_ID} | Failed to clear inherited publish state from ${actor?.name || "actor"}`, error);
+      notifyError(error);
+    });
+  });
+
+  for (const hookName of ["createItem", "updateItem", "deleteItem", "createActiveEffect", "updateActiveEffect", "deleteActiveEffect"]) {
+    Hooks.on(hookName, document => {
+      const actor = resolveActorFromChangedDocument(document);
+      if (!shouldAutoExportActor(actor)) return;
+      scheduleActorExport(actor, 750, hookName);
+    });
+  }
 }
 
 export async function setActorPublished(actor, enabled) {
@@ -112,11 +132,18 @@ export async function setActorPublished(actor, enabled) {
     ...current,
     enabled: Boolean(enabled),
     slug: current.slug || generateSlug(),
+    key: resolveActorKey(actor),
     lastExportStatus: enabled ? (current.lastExportStatus || "pending") : "disabled",
     lastExportError: enabled ? (current.lastExportError || "") : ""
   };
 
+  if (enabled) assertUniquePublishedActorIdentities({ overrideActor: actor, overridePublish: next });
+
   await actor.setFlag(MODULE_ID, PUBLISH_FLAG, next);
+  if (!enabled) {
+    await ensureExportDirectories();
+    await uploadLatestIndex();
+  }
   return next;
 }
 
@@ -130,9 +157,10 @@ export function getPublishedActors() {
     .sort((a, b) => a.name.localeCompare(b.name, game.i18n.lang));
 }
 
-export async function exportActorSnapshot(actor, { reason = "manual", password = null } = {}) {
+export async function exportActorSnapshot(actor, { reason = "manual", password = null, writeIndex = true } = {}) {
   assertCharacter(actor);
   if (!isPublishedCharacterActor(actor)) throw new Error(game.i18n.localize("SSM.Notifications.NotPublished"));
+  assertUniquePublishedActorIdentities();
 
   const publish = getPublishData(actor);
   const accessMode = sheetAccessMode();
@@ -149,9 +177,13 @@ export async function exportActorSnapshot(actor, { reason = "manual", password =
 
   await ensureExportDirectories();
 
-  const snapshot = await extractCharacterSnapshot(actor);
+  const portrait = await mirrorActorPortrait(actor);
+  const snapshot = await extractCharacterSnapshot(actor, { portrait });
   const lastHash = lastHashes.get(actor.id);
-  if (lastHash === snapshot.contentHash && reason !== "manual") return snapshot;
+  if (lastHash === snapshot.contentHash && reason !== "manual") {
+    if (writeIndex) await uploadLatestIndex();
+    return snapshot;
+  }
 
   const exported = accessMode === ACCESS_MODE_EXTERNAL
     ? trustedSnapshot(snapshot, publish.slug)
@@ -163,22 +195,53 @@ export async function exportActorSnapshot(actor, { reason = "manual", password =
     ...publish,
     enabled: true,
     slug: publish.slug,
+    key: resolveActorKey(actor),
     lastExportedAt: exported.updatedAt,
     lastExportStatus: "ok",
     lastExportError: "",
     contentHash: snapshot.contentHash,
+    portrait,
     accessMode
   });
+  if (writeIndex) await uploadLatestIndex();
 
   return snapshot;
 }
 
-export function scheduleActorExport(actor, delay = 1000) {
+/**
+ * External-auth deployments have no SheetShare password to keep in browser
+ * memory, so a primary GM can safely refresh every published actor on ready.
+ * The identity preflight happens before any snapshot or index write.
+ */
+export function refreshPublishedSnapshotsOnReady() {
+  if (!shouldExportFromThisClient() || sheetAccessMode() !== ACCESS_MODE_EXTERNAL) {
+    return Promise.resolve({ skipped: true, refreshed: 0 });
+  }
+  if (readyRefreshPromise) return readyRefreshPromise;
+
+  readyRefreshPromise = (async () => {
+    const actors = getPublishedActors();
+    assertUniquePublishedActorIdentities();
+    await ensureExportDirectories();
+    for (const actor of actors) {
+      await exportActorSnapshot(actor, { reason: "ready", writeIndex: false });
+    }
+    await uploadLatestIndex();
+    console.info(`${MODULE_ID} | Refreshed ${actors.length} published sheet(s) on GM ready.`);
+    return { skipped: false, refreshed: actors.length };
+  })().finally(() => {
+    readyRefreshPromise = null;
+  });
+
+  return readyRefreshPromise;
+}
+
+export function scheduleActorExport(actor, delay = 1000, reason = "auto") {
   const actorId = actor.id;
   window.clearTimeout(pendingExports.get(actorId));
   pendingExports.set(actorId, window.setTimeout(() => {
     pendingExports.delete(actorId);
-    exportActorSnapshot(actor, { reason: "updateActor" }).catch(async error => {
+    exportActorSnapshot(actor, { reason }).catch(async error => {
       console.error(`${MODULE_ID} | Scheduled export failed for ${actor.name}`, error);
       await recordActorError(actor, error);
       notifyError(error);
@@ -251,7 +314,27 @@ export function openSheetShareDoctor() {
 }
 
 function shouldExportFromThisClient() {
-  return Boolean(game.user?.isGM);
+  if (!game.user?.isGM) return false;
+  const users = game.users?.contents ?? game.users ?? [];
+  const activeGms = Array.from(users)
+    .filter(user => user?.active && user?.isGM)
+    .sort((left, right) => String(left.id).localeCompare(String(right.id)));
+  return !activeGms.length || activeGms[0].id === game.user.id;
+}
+
+function shouldAutoExportActor(actor) {
+  if (!shouldExportFromThisClient()) return false;
+  if (!game.settings.get(MODULE_ID, AUTO_EXPORT_SETTING)) return false;
+  return isPublishedCharacterActor(actor);
+}
+
+function resolveActorFromChangedDocument(document) {
+  let current = document;
+  while (current) {
+    if (current.documentName === "Actor" || (current.type === "character" && current.items)) return current;
+    current = current.parent;
+  }
+  return null;
 }
 
 async function recordActorError(actor, error) {
@@ -269,6 +352,31 @@ async function recordActorError(actor, error) {
 
 function getPublishData(actor) {
   return foundry.utils.deepClone(actor?.getFlag?.(MODULE_ID, PUBLISH_FLAG) ?? {});
+}
+
+async function clearInheritedPublishFlag(actor) {
+  if (!actor?.getFlag?.(MODULE_ID, PUBLISH_FLAG)) return false;
+  await actor.unsetFlag(MODULE_ID, PUBLISH_FLAG);
+  console.info(`${MODULE_ID} | Cleared inherited publish state from newly created actor ${actor.name}.`);
+  return true;
+}
+
+function assertUniquePublishedActorIdentities({ overrideActor = null, overridePublish = null } = {}) {
+  const entries = game.actors.contents
+    .filter(actor => actor.type === "character")
+    .map(actor => {
+      const publish = actor === overrideActor ? overridePublish : getPublishData(actor);
+      if (!publish?.enabled) return null;
+      return {
+        actorId: actor.id,
+        name: actor.name,
+        key: publish.key || resolveActorKey(actor),
+        slug: publish.slug
+      };
+    })
+    .filter(Boolean);
+  assertUniquePublishedIdentities(entries);
+  return entries;
 }
 
 function assertCharacter(actor) {
@@ -306,6 +414,55 @@ async function uploadJson(path, filename, value) {
   const blob = new Blob([json], { type: "application/json;charset=utf-8" });
   const file = new File([blob], filename, { type: blob.type });
   return FilePicker.upload("data", path, file, { overwrite: true }, { notify: false });
+}
+
+async function uploadLatestIndex() {
+  await uploadJson(storageRoot(), LATEST_INDEX_FILENAME, buildLatestIndexDocument());
+}
+
+function buildLatestIndexDocument() {
+  const actors = getPublishedActors();
+  assertUniquePublishedActorIdentities();
+  return {
+    schema: LATEST_INDEX_SCHEMA,
+    moduleVersion: game.modules.get(MODULE_ID)?.version || "0.1.0",
+    world: {
+      id: game.world.id,
+      title: game.world.title,
+      systemId: game.system.id,
+      systemVersion: game.system.version,
+      foundryVersion: game.version
+    },
+    updatedAt: new Date().toISOString(),
+    actors: actors.map(buildLatestActorEntry).filter(Boolean)
+  };
+}
+
+function buildLatestActorEntry(actor) {
+  const publish = getPublishData(actor);
+  if (!publish.enabled || !publish.slug) return null;
+  const key = resolveActorKey(actor);
+  const language = shareUrlLanguage();
+  const accessMode = publish.accessMode || sheetAccessMode();
+  return {
+    key,
+    aliases: uniqueStrings([key, normalizeActorKeyPart(actor.name, "character"), slugify(actor.name), publish.slug]),
+    name: actor.name,
+    slug: publish.slug,
+    updatedAt: publish.lastExportedAt || "",
+    contentHash: publish.contentHash || "",
+    portrait: publish.portrait || "",
+    accessMode,
+    viewer: {
+      world: game.world.id,
+      mode: accessMode === ACCESS_MODE_EXTERNAL ? "external" : "password",
+      lang: language || ""
+    }
+  };
+}
+
+function uniqueStrings(values) {
+  return Array.from(new Set(values.map(value => String(value || "").trim()).filter(Boolean)));
 }
 
 async function encryptSnapshot(snapshot, password, slug) {
@@ -433,6 +590,15 @@ function generateSlug() {
     .join("");
 }
 
+function slugify(value) {
+  return String(value || "character")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .toLowerCase() || "character";
+}
+
 function notifyError(error) {
   const message = error?.message ?? String(error);
   ui.notifications?.error?.(game.i18n.format("SSM.Notifications.Error", { error: message }));
@@ -491,7 +657,8 @@ function findSheetShareSettingsPane(root) {
 
   const pane = root.querySelector(".tab.scrollable.active") || root;
   const text = pane.textContent || "";
-  const hasSheetShareSettings = text.includes("Auto-refresh on actor updates")
+  const hasSheetShareSettings = text.includes("Auto-refresh published sheets")
+    || text.includes("Auto-refresh on actor updates")
     || text.includes("Actor 更新时自动刷新")
     || text.includes("Warn when sharing over HTTP")
     || text.includes("HTTP 分享警告")
@@ -506,7 +673,8 @@ function findSettingsAnchor(root) {
   const labels = Array.from(root.querySelectorAll("label, h2, h3, h4, p, div"));
   const marker = labels.find(element => {
     const text = element.textContent || "";
-    return text.includes("Auto-refresh on actor updates")
+    return text.includes("Auto-refresh published sheets")
+      || text.includes("Auto-refresh on actor updates")
       || text.includes("Actor 更新时自动刷新")
       || text.includes("Warn when sharing over HTTP")
       || text.includes("HTTP 分享警告")

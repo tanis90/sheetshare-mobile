@@ -304,23 +304,43 @@ img {
 }
 
 .skill-row .skill-mod {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   color: var(--muted);
   font-weight: 600;
 }
 
-.skill-row.proficient .skill-name::before {
-  content: "";
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin-right: 6px;
-  border-radius: 50%;
-  background: var(--warn);
-  vertical-align: 2px;
+/* Proficiency markers sit in front of the modifier so both the skill names
+   (left edge) and the numbers (right edge) stay aligned. */
+.skill-row.prof-proficient .skill-mod,
+.skill-row.prof-expertise .skill-mod,
+.skill-row.prof-half .skill-mod {
+  color: var(--warn);
 }
 
-.skill-row.proficient .skill-mod {
-  color: var(--warn);
+.skill-row.prof-proficient .skill-mod::before,
+.skill-row.prof-expertise .skill-mod::before,
+.skill-row.prof-half .skill-mod::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  box-sizing: border-box;
+}
+
+.skill-row.prof-proficient .skill-mod::before {
+  border-radius: 50%;
+  background: var(--warn);
+}
+
+.skill-row.prof-expertise .skill-mod::before {
+  background: var(--warn);
+  transform: rotate(45deg);
+}
+
+.skill-row.prof-half .skill-mod::before {
+  border: 1px solid var(--warn);
+  border-radius: 50%;
 }
 
 .pill {

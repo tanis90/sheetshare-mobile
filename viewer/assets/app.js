@@ -86,6 +86,11 @@ const VIEWER_I18N = {
     saves: "Saving Throws",
     skills: "Skills",
     skillsOther: "Other",
+    proficiencyLabels: {
+      half: "Half proficiency",
+      proficient: "Proficient",
+      expertise: "Expertise"
+    },
     languages: "Languages",
     senses: "Senses",
     searchSpells: "Search spells",
@@ -214,6 +219,11 @@ const VIEWER_I18N = {
     saves: "豁免",
     skills: "技能",
     skillsOther: "其他",
+    proficiencyLabels: {
+      half: "半熟练",
+      proficient: "熟练",
+      expertise: "专精"
+    },
     languages: "语言",
     senses: "感官",
     searchSpells: "搜索法术",
@@ -791,12 +801,15 @@ window.characterSheetViewer = function characterSheetViewer() {
                   <strong>${escapeHtml(abilityMod(group.ability))}</strong>
                 </header>
                 <div class="skill-rows">
-                  ${group.items.map(row => `
-                    <div class="skill-row${row.proficiency && row.proficiency !== "none" ? " proficient" : ""}">
+                  ${group.items.map(row => {
+                    const prof = ["half", "proficient", "expertise"].includes(row.proficiency) ? row.proficiency : "";
+                    const title = prof ? ` title="${escapeHtml(t(`proficiencyLabels.${prof}`))}"` : "";
+                    return `
+                    <div class="skill-row${prof ? ` prof-${prof}` : ""}"${title}>
                       <span class="skill-name">${escapeHtml(localizedSkillLabel(row))}</span>
                       <span class="skill-mod">${escapeHtml(row.mod ?? row.value ?? "")}</span>
-                    </div>
-                  `).join("")}
+                    </div>`;
+                  }).join("")}
                 </div>
               </section>
             `).join("")}

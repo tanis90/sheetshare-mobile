@@ -7,6 +7,7 @@ import {
   MAX_ACTOR_KEY_LENGTH,
   buildActorKeyBase,
   isLegacyChineseFallbackKey,
+  legacyActorKeyAlias,
   normalizeActorKeyPart,
   resolveActorKey
 } from "../scripts/actor-key.js";
@@ -39,6 +40,11 @@ test("uses NFC and limits output to the safe Unicode alphabet", () => {
   assert.match(buildActorKeyBase("龙枪", "Éowyn_盾卫"), GENERATED_ACTOR_KEY_PATTERN);
 });
 
+test("keeps the pre-0.2 ASCII alias available for existing links", () => {
+  assert.equal(legacyActorKeyAlias("Darcy Stone"), "darcy-stone");
+  assert.equal(legacyActorKeyAlias("达西"), "character");
+});
+
 test("preserves an existing explicit key exactly", () => {
   const actor = makeActor("Actor00000000001", "旧名字", "COS-Wizard_Custom");
   assert.equal(resolveActorKey(actor, { worldId: "dragonlance", actors: [actor] }), "COS-Wizard_Custom");
@@ -51,6 +57,24 @@ test("migrates only the legacy character fallback assigned to pure-Chinese names
   assert.equal(isLegacyChineseFallbackKey("character", chineseActor.name), true);
   assert.equal(resolveActorKey(chineseActor, { worldId: "dragonlance", actors: [chineseActor] }), "dragonlance-黎安娜-晨盾");
   assert.equal(resolveActorKey(latinActor, { worldId: "dragonlance", actors: [latinActor] }), "character");
+});
+
+test("gives different Chinese actors distinct readable keys when both have the legacy character fallback", () => {
+  const darcy = makeActor("Actor00000000012", "达西", "character");
+  const hanna = makeActor("Actor00000000013", "汉娜", "character");
+  const actors = [darcy, hanna];
+
+  assert.equal(resolveActorKey(darcy, { worldId: "COS", actors }), "cos-达西");
+  assert.equal(resolveActorKey(hanna, { worldId: "COS", actors }), "cos-汉娜");
+});
+
+test("preserves the remote slug-backed key during the readable-key upgrade", () => {
+  const key = "actor-0123456789abcdef01234567";
+  const actor = makeActor("Actor00000000014", "达西", key);
+
+  assert.equal(resolveActorKey(actor, { worldId: "COS", actors: [actor] }), key);
+  actor.name = "达西·石";
+  assert.equal(resolveActorKey(actor, { worldId: "another-world", actors: [actor] }), key);
 });
 
 test("remains stable after migration is persisted, even after rename or world changes", () => {

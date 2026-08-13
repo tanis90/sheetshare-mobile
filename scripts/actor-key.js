@@ -17,6 +17,16 @@ export function buildActorKeyBase(worldId, actorName) {
   );
 }
 
+/** Preserve the pre-0.2 ASCII alias so existing Latin-name links keep resolving. */
+export function legacyActorKeyAlias(value) {
+  return String(value || "character")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .toLowerCase() || "character";
+}
+
 /**
  * Resolve a stable public key without mutating the actor.
  *

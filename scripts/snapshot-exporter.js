@@ -1,5 +1,5 @@
 import { extractCharacterSnapshot } from "./snapshot-extractor.js";
-import { normalizeActorKeyPart, resolveActorKey } from "./actor-key.js";
+import { legacyActorKeyAlias, normalizeActorKeyPart, resolveActorKey } from "./actor-key.js";
 import { mirrorActorPortrait } from "./portrait-mirror.js";
 import { assertUniquePublishedIdentities } from "./publish-safety.js";
 
@@ -451,7 +451,7 @@ function buildLatestActorEntry(actor) {
       key,
       publish.key,
       normalizeActorKeyPart(actor.name, "character"),
-      slugify(actor.name),
+      legacyActorKeyAlias(actor.name),
       publish.slug
     ]),
     name: actor.name,

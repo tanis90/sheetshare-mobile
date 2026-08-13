@@ -63,6 +63,8 @@ test("runtime wires clone cleanup, ready refresh, and mirrored portrait fields",
   assert.match(exporterSource, /actor\.unsetFlag\(MODULE_ID, PUBLISH_FLAG\)/);
   assert.match(moduleSource, /refreshPublishedSnapshotsOnReady\(\)\.catch/);
   assert.match(exporterSource, /assertUniquePublishedActorIdentities\(\);[\s\S]*mirrorActorPortrait\(actor\)/);
+  assert.match(exporterSource, /legacyActorKeyAlias\(actor\.name\)/);
+  assert.doesNotMatch(exporterSource, /\bslugify\(actor\.name\)/);
   assert.match(exporterSource, /portrait: publish\.portrait \|\| ""/);
   assert.match(extractorSource, /extractCharacterSnapshot\(actor, \{ portrait = "" \}/);
 });

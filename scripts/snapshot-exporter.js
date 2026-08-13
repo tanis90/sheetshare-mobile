@@ -128,10 +128,11 @@ export async function setActorPublished(actor, enabled) {
   if (!game.user?.isGM) throw new Error("Only a GM can publish mobile sheets.");
 
   const current = getPublishData(actor);
+  const slug = current.slug || generateSlug();
   const next = {
     ...current,
     enabled: Boolean(enabled),
-    slug: current.slug || generateSlug(),
+    slug,
     key: resolveActorKey(actor),
     lastExportStatus: enabled ? (current.lastExportStatus || "pending") : "disabled",
     lastExportError: enabled ? (current.lastExportError || "") : ""
@@ -446,13 +447,19 @@ function buildLatestActorEntry(actor) {
   const accessMode = publish.accessMode || sheetAccessMode();
   return {
     key,
-    aliases: uniqueStrings([key, normalizeActorKeyPart(actor.name, "character"), slugify(actor.name), publish.slug]),
+    aliases: uniqueStrings([
+      key,
+      publish.key,
+      normalizeActorKeyPart(actor.name, "character"),
+      slugify(actor.name),
+      publish.slug
+    ]),
     name: actor.name,
     slug: publish.slug,
     updatedAt: publish.lastExportedAt || "",
     contentHash: publish.contentHash || "",
-    portrait: publish.portrait || "",
     accessMode,
+    portrait: publish.portrait || "",
     viewer: {
       world: game.world.id,
       mode: accessMode === ACCESS_MODE_EXTERNAL ? "external" : "password",
@@ -588,15 +595,6 @@ function generateSlug() {
   return Array.from(bytes)
     .map(byte => byte.toString(16).padStart(2, "0"))
     .join("");
-}
-
-function slugify(value) {
-  return String(value || "character")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .toLowerCase() || "character";
 }
 
 function notifyError(error) {

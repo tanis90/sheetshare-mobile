@@ -270,10 +270,6 @@ const VIEWER_I18N = {
 const PASSWORD_CACHE_PREFIX = "sheetshare-mobile:v1";
 const ENCRYPTED_SNAPSHOT_SCHEMA = "sheetshare-mobile.encrypted-snapshot.v1";
 const TRUSTED_SNAPSHOT_SCHEMA = "sheetshare-mobile.trusted-snapshot.v1";
-const CLASS_ICON_IDS = new Set([
-  "artificer", "barbarian", "bard", "cleric", "druid", "fighter", "monk",
-  "paladin", "ranger", "rogue", "sorcerer", "warlock", "wizard"
-]);
 
 // Skill -> governing ability, fixed by the D&D 5e rules. Kept in the viewer so
 // that snapshots without a per-skill ability field still group correctly.
@@ -696,19 +692,6 @@ window.characterSheetViewer = function characterSheetViewer() {
 
     visibleTabs() {
       return this.tabs.filter(tabItem => tabItem.id !== "spells" || this.hasSpellcasting());
-    },
-
-    classIconEntries() {
-      const list = this.selected?.summary?.classList ?? [];
-      return list
-        .map(entry => ({ ...entry, id: String(entry?.id || "").toLowerCase() }))
-        .filter(entry => CLASS_ICON_IDS.has(entry.id))
-        .map(entry => ({
-          id: entry.id,
-          name: entry.name || entry.id,
-          levels: entry.levels ?? "",
-          icon: `assets/classes/${entry.id}.png`
-        }));
     },
 
     assetUrl(path) {

@@ -254,14 +254,61 @@ img {
 
 .skill-groups {
   display: grid;
-  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
-.skill-group .compact-list {
-  margin-top: 6px;
+.skill-group {
+  align-self: start;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: var(--surface-2);
 }
 
-.line-item.proficient .line-name::before {
+.skill-group-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--line);
+  color: #9aa5ad;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.skill-group-head strong {
+  color: var(--warn);
+  font-size: 13px;
+}
+
+.skill-rows {
+  display: grid;
+  gap: 2px;
+}
+
+.skill-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.skill-row .skill-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.skill-row .skill-mod {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.skill-row.proficient .skill-name::before {
   content: "";
   display: inline-block;
   width: 6px;
@@ -272,7 +319,7 @@ img {
   vertical-align: 2px;
 }
 
-.line-item.proficient .line-meta {
+.skill-row.proficient .skill-mod {
   color: var(--warn);
 }
 

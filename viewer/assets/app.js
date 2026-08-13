@@ -759,12 +759,15 @@ window.characterSheetViewer = function characterSheetViewer() {
       `;
     },
 
-    // Skills are grouped by their governing ability (fixed 5e mapping) so the
-    // panel reads like a paper sheet; unproficient (+0) rows stay visible.
-    skillsPanelHtml(rows) {
+    // Skills are grouped into one card per governing ability (fixed 5e
+    // mapping). The card header carries the ability modifier for context;
+    // unproficient (+0) rows stay visible, proficient ones get a gold mark.
+    skillsPanelHtml(rows, abilities = []) {
       const safeRows = rows ?? [];
       if (!safeRows.length) return "";
       const sortByLabel = (a, b) => localizedSkillLabel(a).localeCompare(localizedSkillLabel(b), activeLanguage);
+      const abilityMod = key => (abilities ?? [])
+        .find(entry => String(entry?.key || "").toLowerCase() === key)?.mod ?? "";
       const groups = SKILL_GROUP_ORDER
         .map(ability => ({
           ability,
@@ -782,17 +785,20 @@ window.characterSheetViewer = function characterSheetViewer() {
           <div class="panel-head"><h3>${escapeHtml(t("skills"))}</h3></div>
           <div class="panel-body skill-groups">
             ${groups.map(group => `
-              <div class="skill-group">
-                <span class="trait-group-label">${escapeHtml(group.ability ? t(`abilities.${group.ability}`) : t("skillsOther"))}</span>
-                <div class="compact-list two-col">
+              <section class="skill-group">
+                <header class="skill-group-head">
+                  <span>${escapeHtml(group.ability ? t(`abilities.${group.ability}`) : t("skillsOther"))}</span>
+                  <strong>${escapeHtml(abilityMod(group.ability))}</strong>
+                </header>
+                <div class="skill-rows">
                   ${group.items.map(row => `
-                    <div class="line-item${row.proficiency && row.proficiency !== "none" ? " proficient" : ""}">
-                      <span class="line-name">${escapeHtml(localizedSkillLabel(row))}</span>
-                      <span class="line-meta">${escapeHtml(row.mod ?? row.value ?? "")}</span>
+                    <div class="skill-row${row.proficiency && row.proficiency !== "none" ? " proficient" : ""}">
+                      <span class="skill-name">${escapeHtml(localizedSkillLabel(row))}</span>
+                      <span class="skill-mod">${escapeHtml(row.mod ?? row.value ?? "")}</span>
                     </div>
                   `).join("")}
                 </div>
-              </div>
+              </section>
             `).join("")}
           </div>
         </div>

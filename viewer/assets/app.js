@@ -644,7 +644,7 @@ window.characterSheetViewer = function characterSheetViewer() {
       const facts = this.activeReference()?.facts ?? [];
       if (!facts.length) return "";
       return facts.map(fact => `
-        <span class="pill">${escapeHtml(fact.label)} ${escapeHtml(fact.value)}</span>
+        <span class="fact"><span class="fact-label">${escapeHtml(fact.label)}</span><span class="fact-value">${escapeHtml(fact.value)}</span></span>
       `).join("");
     },
 
@@ -892,9 +892,9 @@ function detailFacts(item, kind) {
   }
   const html = facts
     .filter(([, value]) => value !== null && value !== undefined && value !== "")
-    .map(([label, value]) => `<span class="pill">${escapeHtml(label)} ${escapeHtml(value)}</span>`)
+    .map(([label, value]) => `<span class="fact"><span class="fact-label">${escapeHtml(label)}</span><span class="fact-value">${escapeHtml(value)}</span></span>`)
     .join("");
-  return html ? `<div class="pill-row">${html}</div>` : "";
+  return html ? `<div class="fact-row">${html}</div>` : "";
 }
 
 function actionGroupKey(activation) {

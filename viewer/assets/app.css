@@ -236,6 +236,32 @@ img {
   margin-top: 8px;
 }
 
+/* Static label+value facts render as plain text, not pills, so that only
+   actual interactive elements (reference buttons) look clickable. */
+.fact-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 8px;
+}
+
+.fact {
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.fact-label {
+  margin-right: 4px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.fact-value {
+  color: var(--text);
+  font-weight: 600;
+}
+
 .trait-groups {
   display: grid;
   gap: 12px;

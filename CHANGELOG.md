@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.3.0 - 2026-08-14
+
+### Features
+
+- Render Foundry inline dice formulas as static display chips in snapshot descriptions and route inline embeds through the existing reference preview flow.
+
+### Fixes
+
+- Style static detail facts and dice formulas as square gold chips, keeping round red pills exclusively for clickable references.
+
 ## 0.2.0 - 2026-08-13
 
 ### Features

@@ -214,6 +214,7 @@ img {
 }
 
 .portrait {
+  position: relative;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -221,6 +222,41 @@ img {
   background: linear-gradient(135deg, #eff3f1, #dfe7e2);
   color: var(--accent);
   font-weight: 700;
+}
+
+/* Inspiration is a boolean badge: a glowing gold ring around the portrait
+   plus a status chip under the name. Only rendered when the snapshot carries
+   the field, so legacy snapshots show nothing. */
+.portrait.inspired {
+  box-shadow:
+    0 0 0 2px rgba(216, 177, 109, 0.75),
+    0 0 14px rgba(216, 177, 109, 0.4);
+}
+
+.identity-meta {
+  margin-top: 6px;
+}
+
+.inspiration-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  border: 1px solid rgba(199, 164, 108, 0.4);
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(199, 164, 108, 0.45);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.inspiration-chip.active {
+  border-color: rgba(240, 223, 189, 0.85);
+  background: linear-gradient(180deg, rgba(216, 177, 109, 0.22), rgba(110, 15, 24, 0.18));
+  color: #f0dfbd;
+  box-shadow: 0 0 10px rgba(216, 177, 109, 0.35);
+  text-shadow: 0 0 6px rgba(216, 177, 109, 0.45);
 }
 
 .portrait img {

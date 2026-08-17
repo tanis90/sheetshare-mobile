@@ -10,9 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Caudex:wght@400;700&family=Noto+Serif+SC:wght@700&family=Noto+Sans+SC:wght@400;500;700&display=swap">
-  <link rel="stylesheet" href="assets/app.css?v=0.2.18-ui">
+  <link rel="stylesheet" href="assets/app.css?v=0.2.20-ui">
   <script defer src="assets/path-utils.js?v=0.1.2-world-media"></script>
-  <script defer src="assets/app.js?v=0.2.18-ui"></script>
+  <script defer src="assets/app.js?v=0.2.20-ui"></script>
   <script defer src="assets/alpine.min.js"></script>
 </head>
 <body>
@@ -90,13 +90,14 @@
       <div class="detail-shell" x-on:click="handleContentClick($event)">
         <aside class="summary-column">
           <section class="identity">
-            <div class="portrait">
+            <div class="portrait" :class="{ inspired: selected?.summary?.inspiration }">
               <img x-show="selected?.summary.portrait" :src="assetUrl(selected?.summary.portrait)" alt="" width="78" height="78" loading="lazy">
               <span x-show="!selected?.summary.portrait" x-text="initials(selected?.summary.name)"></span>
             </div>
             <div>
               <h2 x-text="selected?.summary.name" :class="nameLengthClass(selected?.summary.name)" :title="selected?.summary.name"></h2>
               <p x-text="[selected?.summary.species, selected?.summary.classes].filter(Boolean).join(' / ')"></p>
+              <p class="identity-meta" x-show="selected?.summary?.inspiration !== undefined"><span class="inspiration-chip" :class="{ active: selected?.summary?.inspiration }" :title="t('inspiration')">★ <span x-text="t('inspiration')"></span></span></p>
             </div>
           </section>
 

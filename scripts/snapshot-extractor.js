@@ -66,6 +66,7 @@ export async function extractCharacterSnapshot(actor, { portrait = "" } = {}) {
       level: summarizeLevel(actor),
       xp: details.xp?.value ?? "",
       proficiencyBonus: signed(attributes.prof ?? 0),
+      inspiration: Boolean(attributes.inspiration),
       ac: attributes.ac?.value ?? attributes.ac?.flat ?? "",
       initiative: resolveInitiative(attributes.init, abilities),
       speed: formatSummarySpeed(attributes.movement),

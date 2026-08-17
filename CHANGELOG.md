@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.4.0 - 2026-08-17
+
+### Features
+
+- Export the Actor's inspiration state and show a glowing Heroic Inspiration chip on the shared character sheet when it is active.
+
+### Fixes
+
+- Keep the inspiration indicator to a single chip beneath the character name and hide it completely when inspiration is inactive.
+
 ## 0.3.0 - 2026-08-14
 
 ### Features

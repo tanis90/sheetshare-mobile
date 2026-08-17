@@ -86,7 +86,7 @@ const VIEWER_I18N = {
     saves: "Saving Throws",
     skills: "Skills",
     skillsOther: "Other",
-    inspiration: "Inspiration",
+    inspiration: "Heroic Inspiration",
     proficiencyLabels: {
       half: "Half proficiency",
       proficient: "Proficient",
@@ -216,7 +216,7 @@ const VIEWER_I18N = {
     saves: "豁免",
     skills: "技能",
     skillsOther: "其他",
-    inspiration: "激励",
+    inspiration: "英雄激励",
     proficiencyLabels: {
       half: "半熟练",
       proficient: "熟练",

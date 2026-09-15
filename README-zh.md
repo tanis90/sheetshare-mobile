@@ -141,3 +141,7 @@ SheetShare Mobile 的 Foundry 模块界面和手机分享页都有英文、简�
 ## 当前范围
 
 第一版公共发布目标聚焦常见单 GM 工作流。当前支持已发布角色在角色、物品和 Active Effect 变化后自动刷新。
+
+## 许可证
+
+本项目基于 [MIT 许可证](LICENSE) 开源。内置的 `viewer/assets/alpine.min.js` 来自 [Alpine.js](https://alpinejs.dev/)，同样基于 MIT 许可证。

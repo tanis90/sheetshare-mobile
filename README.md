@@ -143,3 +143,7 @@ Release instructions are in [docs/RELEASE.md](docs/RELEASE.md).
 ## Current Scope
 
 The first public target focuses on the common single-GM workflow. Published character sheets auto-refresh after actor, item, and active effect changes while a GM browser is online.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE). The bundled `viewer/assets/alpine.min.js` is [Alpine.js](https://alpinejs.dev/), licensed under the MIT License.

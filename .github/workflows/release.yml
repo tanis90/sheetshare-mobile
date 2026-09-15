@@ -73,7 +73,7 @@ jobs:
           set -euo pipefail
           rm -rf dist
           mkdir -p dist/package
-          git archive --format=tar HEAD module.json languages scripts styles viewer | tar -x -C dist/package
+          git archive --format=tar HEAD LICENSE module.json languages scripts styles viewer | tar -x -C dist/package
           rm -rf dist/package/scripts/tools
           find dist/package/scripts -type f -name '*.test.mjs' -delete
 

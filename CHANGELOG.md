@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.4.1 - 2026-09-15
+
+### Documentation
+
+- Add the MIT `LICENSE` file, declare `license` in the module manifest, and add license sections to the READMEs.
+- Ship the `LICENSE` file inside the release zip and remove the deprecated `cn` language code, keeping `zh-cn` for Simplified Chinese.
+
 ## 0.4.0 - 2026-08-17
 
 ### Features

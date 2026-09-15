@@ -269,7 +269,12 @@ export async function copyActorLink(actor) {
   try {
     await navigator.clipboard.writeText(url);
   } catch {
-    window.prompt(game.i18n.localize("SSM.Notifications.NoClipboard"), url);
+    await foundry.applications.api.DialogV2.prompt({
+      window: { title: game.i18n.localize("SSM.Notifications.NoClipboard") },
+      content: `<p>${game.i18n.localize("SSM.Notifications.NoClipboard")}</p>
+        <input type="text" value="${escapeHtml(url)}" readonly onclick="this.select()">`,
+      ok: { label: "OK" }
+    }).catch(() => null);
   }
   return url;
 }
@@ -389,7 +394,14 @@ async function getSessionPassword({ promptIfMissing = false } = {}) {
   if (existing) return existing;
   if (!promptIfMissing) return "";
 
-  const password = window.prompt(game.i18n.localize("SSM.PasswordPrompt"));
+  const result = await foundry.applications.api.DialogV2.input({
+    window: { title: game.i18n.localize("SSM.PasswordPrompt") },
+    content: `<label>${game.i18n.localize("SSM.PasswordPrompt")}</label>
+      <input type="password" name="password" autofocus>`,
+    ok: { label: "OK" }
+  }).catch(() => null);
+
+  const password = result?.password;
   if (!password) return "";
   window[SESSION_PASSWORD_KEY] = password;
   return password;

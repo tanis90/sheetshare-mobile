@@ -1,94 +1,649 @@
-.sheetshare-mobile-manager {
-  display: grid;
+/* SheetShare Mobile - Mobile View overlay */
+
+@import url("https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Caudex:wght@400;700&family=Noto+Serif+SC:wght@700&family=Noto+Sans+SC:wght@400;500;700&display=swap");
+
+/* Dice So Nice renders its 3D animation in #dice-box-canvas at a much
+   lower z-index (1000) than this overlay (100000), since it was never
+   designed to run underneath a full-screen sheet. Force it above ours
+   so the dice are actually visible when a roll happens; !important is
+   required because Dice So Nice sets its z-index inline via JS, which
+   otherwise beats a plain stylesheet rule. */
+#dice-box-canvas {
+  z-index: 200000 !important;
+}
+
+/* Foundry's own windowed Applications (DialogV2, including the roll
+   configuration prompt for advantage/disadvantage/normal) use a
+   dynamic, incrementing z-index that was never designed to sit above a
+   full-screen overlay like this one, so they'd otherwise render hidden
+   underneath the sheet. ".application" is Foundry's stable root class
+   for every windowed Application, V1 and V2 alike, so this catches
+   dialogs generally, not just the roll prompt specifically. */
+/* Foundry's own windowed Applications (DialogV2, including the roll
+   configuration prompt for advantage/disadvantage/normal) use a
+   dynamic, incrementing z-index that was never designed to sit above a
+   full-screen overlay like this one. Rather than force every
+   .application element above ours here (which caught elements that
+   should stay invisible), each dialog's z-index is bumped individually,
+   only while Mobile View is open - see raiseDialogsAboveOverlay() in
+   mobile-view.js. */
+
+#ssm-mobile-view {
+  --bg: #050505;
+  --surface: rgba(17, 12, 11, 0.86);
+  --surface-2: rgba(30, 21, 18, 0.82);
+  --line: rgba(107, 97, 89, 0.46);
+  --text: #e8dcc8;
+  --muted: #a99170;
+  --accent: #8f1d22;
+  --accent-2: #9c7650;
+  --warn: #c7a46c;
+  --danger: #b51b22;
+
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  background:
+    linear-gradient(180deg, rgba(8, 8, 8, 0.98), rgba(16, 13, 12, 0.96) 46%, #050505),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0.018) 1px, transparent 1px, transparent 9px);
+  color: var(--text);
+  overflow: hidden;
+  overscroll-behavior: contain;
+  touch-action: manipulation;
+  font-family: Caudex, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#ssm-mobile-view::before,
+#ssm-mobile-view::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+#ssm-mobile-view::before {
+  background:
+    linear-gradient(90deg, rgba(110, 15, 24, 0.12), transparent 24%, transparent 76%, rgba(127, 137, 144, 0.1)),
+    radial-gradient(ellipse at 50% 100%, transparent 22%, rgba(5, 5, 5, 0.68) 76%);
+  opacity: 0.58;
+  z-index: -2;
+}
+
+#ssm-mobile-view::after {
+  background:
+    radial-gradient(ellipse at 15% 95%, rgba(127, 137, 144, 0.12), transparent 38%),
+    radial-gradient(ellipse at 90% 10%, rgba(110, 15, 24, 0.12), transparent 36%);
+  filter: blur(40px);
+  opacity: 0.42;
+  z-index: -1;
+}
+
+#ssm-mobile-view * {
+  box-sizing: border-box;
+}
+
+#ssm-mobile-view img {
+  max-width: 100%;
+  display: block;
+}
+
+#ssm-mobile-view button {
+  font: inherit;
+  cursor: pointer;
+  border: 0;
+  color: inherit;
+}
+
+/* Everything from the top bar through the tab strip stays fixed in
+   place - the character's name, portrait, HP, and stats are always
+   visible, only the panel content below scrolls. */
+.ssm-mv-pinned {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.ssm-mv-ability,
+.ssm-mv-list-row,
+.ssm-mv-tab,
+.ssm-mv-roll-btn,
+.ssm-mv-stat-row span.rollable,
+.ssm-mv-close,
+#ssm-floating-button,
+.ssm-mv-expandable summary {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ssm-mv-topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: calc(10px + env(safe-area-inset-top, 0px)) 14px 10px;
+  border-bottom: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(17, 16, 15, 0.98), rgba(5, 5, 5, 0.96)),
+    repeating-linear-gradient(90deg, rgba(215, 196, 165, 0.035), rgba(215, 196, 165, 0.035) 1px, transparent 1px, transparent 18px);
+}
+
+.ssm-mv-close {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(199, 164, 108, 0.12);
+  color: var(--text);
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.ssm-mv-title {
+  font-family: "Cinzel Decorative", Cinzel, "Noto Serif SC", "Songti SC", serif;
+  color: #ead7b8;
+  text-shadow: 0 4px 22px rgba(0, 0, 0, 0.5);
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ssm-mv-header {
+  display: flex;
   gap: 12px;
+  padding: 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
 }
 
-.sheetshare-mobile-manager p {
-  margin: 0;
+.ssm-mv-portrait {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid rgba(199, 164, 108, 0.45);
+  flex-shrink: 0;
+  box-shadow: var(--shadow, 0 12px 30px rgba(0, 0, 0, 0.4));
 }
 
-.sheetshare-mobile-manager table {
-  width: 100%;
-  border-collapse: collapse;
+.ssm-mv-headline {
+  flex: 1;
+  min-width: 0;
 }
 
-.sheetshare-mobile-manager th,
-.sheetshare-mobile-manager td {
-  padding: 6px 8px;
-  border-bottom: 1px solid var(--color-border-light-tertiary, #ccc);
-  text-align: left;
-  vertical-align: middle;
+.ssm-mv-classline {
+  font-size: 13px;
+  color: var(--warn);
+  margin-bottom: 6px;
+  letter-spacing: 0.01em;
 }
 
-.sheetshare-mobile-toolbar {
+.ssm-mv-hp-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.sheetshare-mobile-settings-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin: 0 0 18px;
-  padding: 12px;
-  border: 1px solid var(--color-border-light-tertiary, #ccc);
-  border-radius: 6px;
-}
-
-.sheetshare-mobile-settings-actions button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   gap: 8px;
-  min-height: 38px;
+  margin-bottom: 6px;
 }
 
-.sheetshare-mobile-actions {
+.ssm-mv-hp-bar {
+  flex: 1;
+  height: 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.ssm-mv-hp-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 200ms ease;
+}
+
+.ssm-mv-hp-fill--healthy { background: #5fa876; }
+.ssm-mv-hp-fill--wounded { background: var(--warn); }
+.ssm-mv-hp-fill--critical { background: #b5511b; }
+.ssm-mv-hp-fill--down { background: #5a5a5a; }
+
+.ssm-mv-hp-text {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ssm-mv-stat-row {
   display: flex;
+  gap: 10px;
   flex-wrap: wrap;
+}
+
+.ssm-mv-stat-row span {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.ssm-mv-stat-row span.rollable {
+  cursor: pointer;
+  color: var(--text);
+  border-color: rgba(199, 164, 108, 0.5);
+}
+
+.ssm-mv-stat-row span.rollable:active {
+  background: rgba(110, 15, 24, 0.28);
+  transform: scale(0.96);
+}
+
+.ssm-mv-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  overflow-x: auto;
+}
+
+.ssm-mv-tab {
+  flex: 1;
+  min-width: 72px;
+  min-height: 44px;
+  padding: 10px 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border-bottom: 2px solid transparent;
+  font-family: Cinzel, "Noto Serif SC", serif;
+}
+
+.ssm-mv-tab.active {
+  color: #ead7b8;
+  border-bottom-color: var(--warn);
+}
+
+.ssm-mv-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 14px;
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+}
+
+.ssm-mv-panel-head {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--warn);
+  font-family: Cinzel, "Noto Serif SC", serif;
+  margin: 18px 0 8px;
+}
+
+.ssm-mv-panel-head:first-child {
+  margin-top: 0;
+}
+
+.ssm-mv-ability-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ssm-mv-ability {
+  min-height: 70px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+  background: var(--surface-2);
+  text-align: center;
+  cursor: pointer;
+}
+
+.ssm-mv-ability:active {
+  background: rgba(143, 29, 34, 0.25);
+  transform: scale(0.97);
+}
+
+.ssm-mv-ability span {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.ssm-mv-ability strong {
+  display: block;
+  font-size: 19px;
+  color: var(--text);
+}
+
+.ssm-mv-ability small {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.ssm-mv-list {
+  display: grid;
   gap: 6px;
 }
 
-.sheetshare-mobile-error {
-  color: var(--color-text-dark-danger, #9a1b1b);
+.ssm-mv-list-row {
+  display: flex;
+  justify-content: space-between;
+  min-height: 44px;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.ssm-mv-list-row:active {
+  background: rgba(143, 29, 34, 0.25);
+  transform: scale(0.98);
+}
+
+.ssm-mv-action {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background: var(--surface-2);
+}
+
+.ssm-mv-action-name {
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #ead7b8;
+}
+
+.ssm-mv-action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ssm-mv-roll-btn {
+  flex: 1 1 auto;
+  min-width: 120px;
+  min-height: 44px;
+  padding: 9px 12px;
+  border: 1px solid rgba(199, 164, 108, 0.45);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(143, 29, 34, 0.28), rgba(8, 8, 8, 0.5));
+  color: #f0dfbd;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.ssm-mv-roll-btn:active {
+  transform: scale(0.97);
+}
+
+.ssm-mv-empty {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.ssm-mv-error {
+  padding: 24px;
+  color: #ff8f8f;
+}
+
+.ssm-mv-slot-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.ssm-mv-slot {
+  flex: 1 1 60px;
+  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 4px;
+  background: var(--surface-2);
+}
+
+.ssm-mv-slot span {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.ssm-mv-slot strong {
+  display: block;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.ssm-mv-expandable {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.ssm-mv-expandable summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  list-style: none;
+}
+
+.ssm-mv-expandable summary::-webkit-details-marker {
+  display: none;
+}
+
+.ssm-mv-expandable-meta {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.ssm-mv-expandable-body {
+  padding: 0 12px 12px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.ssm-mv-expandable-body p:first-child {
+  margin-top: 0;
+}
+
+.ssm-mv-expandable-body .ssm-mv-action-buttons {
+  margin-top: 10px;
+}
+
+/* Roll result toast */
+
+#ssm-mv-roll-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  z-index: 100001;
+  min-width: 200px;
+  max-width: min(90vw, 340px);
+  padding: 16px 22px;
+  border-radius: 14px;
+  border: 1px solid rgba(199, 164, 108, 0.55);
+  background:
+    linear-gradient(180deg, rgba(20, 15, 14, 0.97), rgba(5, 5, 5, 0.97)),
+    radial-gradient(ellipse at 50% 0%, rgba(110, 15, 24, 0.28), transparent 70%);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+  text-align: center;
+  cursor: pointer;
+  transform: translate(-50%, 24px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+
+#ssm-mv-roll-toast.visible {
+  transform: translate(-50%, 0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ssm-mv-roll-toast-title {
+  color: var(--warn);
+  font-family: "Cinzel Decorative", Cinzel, "Noto Serif SC", serif;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+
+.ssm-mv-roll-toast-total {
+  font-size: 40px;
+  line-height: 1.1;
+  font-weight: 700;
+  color: #f0dfbd;
+}
+
+.ssm-mv-roll-toast-detail {
+  margin-top: 4px;
   font-size: 12px;
+  color: var(--muted);
 }
 
-.sheetshare-mobile-test-result {
-  color: var(--color-text-light-highlight, #6f5415);
-  font-size: 12px;
+#ssm-mv-roll-toast.critical .ssm-mv-roll-toast-total {
+  color: #ffe9b8;
+  text-shadow: 0 0 26px rgba(255, 214, 128, 0.55);
 }
 
-.sheetshare-mobile-doctor {
-  display: grid;
-  gap: 12px;
+#ssm-mv-roll-toast.fumble .ssm-mv-roll-toast-total {
+  color: #ff8f8f;
 }
 
-.sheetshare-mobile-doctor table {
+#ssm-mv-roll-toast.pending .ssm-mv-roll-toast-detail {
+  color: var(--warn);
+}
+
+/* Floating entry button, visible whenever the current user has an
+   assigned character, so they don't need to open the full sheet first */
+
+#ssm-floating-button {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 90;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #8f1d22, #4a0f12);
+  color: #f0dfbd;
+  font-size: 20px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(199, 164, 108, 0.45);
+}
+
+#ssm-floating-button:active {
+  transform: scale(0.94);
+}
+
+
+
+/* Quick HP adjuster - lives outside #ssm-mobile-view so it survives
+   the overlay's own re-renders while it's open */
+
+#ssm-mv-hp-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100002;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 0 12px calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+.ssm-mv-hp-modal-card {
   width: 100%;
-  border-collapse: collapse;
+  max-width: 360px;
+  border-radius: 16px 16px 12px 12px;
+  border: 1px solid rgba(199, 164, 108, 0.5);
+  background: linear-gradient(180deg, rgba(20, 15, 14, 0.98), rgba(5, 5, 5, 0.98));
+  padding: 16px;
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.5);
 }
 
-.sheetshare-mobile-doctor th,
-.sheetshare-mobile-doctor td {
-  padding: 6px 8px;
-  border-bottom: 1px solid var(--color-border-light-tertiary, #ccc);
-  text-align: left;
-  vertical-align: top;
+.ssm-mv-hp-modal-title {
+  font-family: Cinzel, "Noto Serif SC", serif;
+  color: #c7a46c;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 4px;
 }
 
-.sheetshare-mobile-doctor-ok td:nth-child(2) {
-  color: #1e7f3f;
+.ssm-mv-hp-modal-current {
+  text-align: center;
+  font-size: 28px;
   font-weight: 700;
+  color: #f0dfbd;
+  margin-bottom: 14px;
 }
 
-.sheetshare-mobile-doctor-warn td:nth-child(2) {
-  color: #a86422;
-  font-weight: 700;
+.ssm-mv-hp-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
-.sheetshare-mobile-doctor-error td:nth-child(2) {
-  color: #9a1b1b;
+.ssm-mv-hp-modal-btn {
+  min-height: 52px;
+  border-radius: 10px;
+  font-size: 17px;
   font-weight: 700;
+  border: 1px solid rgba(199, 164, 108, 0.4);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.ssm-mv-hp-modal-btn.dmg {
+  background: linear-gradient(180deg, rgba(143, 29, 34, 0.35), rgba(8, 8, 8, 0.6));
+  color: #ffb3b3;
+}
+
+.ssm-mv-hp-modal-btn.heal {
+  background: linear-gradient(180deg, rgba(63, 122, 82, 0.35), rgba(8, 8, 8, 0.6));
+  color: #bdeecb;
+}
+
+.ssm-mv-hp-modal-btn:active {
+  transform: scale(0.95);
+}
+
+.ssm-mv-hp-modal-close {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted, #a99170);
+  font-size: 14px;
+  -webkit-user-select: none;
+  user-select: none;
 }

@@ -28,7 +28,13 @@
       "AccessModeName": "访问模式",
       "AccessModeHint": "密码模式是安全默认值。External Auth 会写出 trusted 明文快照，只应在分享页和 assets 已经由反向代理或门户认证保护时使用。",
       "AccessModePassword": "密码保护的加密快照",
-      "AccessModeExternal": "External Auth / 受信门户"
+      "AccessModeExternal": "External Auth / 受信门户",
+      "ExternalViewerEnabledName": "使用外部查看器服务器",
+      "ExternalViewerEnabledHint": "Foundry v14.361 及以上版本会阻止静态 HTML 页面正常渲染，导致本模块的移动端分享链接失效。如果你正在运行随附的 serve-viewer.js 配套服务器（它能正确提供查看器页面，并将其余请求转发给 Foundry），请启用此选项。",
+      "ExternalViewerPortName": "外部查看器服务器端口",
+      "ExternalViewerPortHint": "必须与 serve-viewer.js 配套服务器所使用的 VIEWER_PORT 一致（默认 8321）。",
+      "RollBridgeEnabledName": "启用投骰桥接（实验性功能）",
+      "RollBridgeEnabledHint": "将移动端查看器上的属性/豁免/技能/攻击投骰作为真实投骰发送到 Foundry，使其显示在聊天记录中。需要外部查看器服务器保持运行，并且此 Foundry 标签页保持打开——原理是从你自己的 GM 会话轮询配套服务器，无需额外登录或账号。此功能为实验性质——实际使用的投骰方法取决于你的 dnd5e 系统版本。"
     },
     "Manager": {
       "Intro": "已发布角色卡是由 Foundry 现有网页服务器提供的静态快照。",
@@ -72,14 +78,56 @@
       "AccessModePassword": "密码保护的加密快照。",
       "AccessModeExternal": "External Auth 已启用。公开分享前请确认 /modules/sheetshare-mobile/viewer 和 /assets/sheetshare-mobile 已受认证保护。",
       "Readable": "可读取：{url}",
-      "HttpStatus": "HTTP {status}：{url}"
+      "HttpStatus": "HTTP {status}：{url}",
+      "ExternalViewer": "外部查看器服务器",
+      "ExternalViewerBadType": "可以连接，但未返回 HTML（content-type 为：{contentType}）。请确认 serve-viewer.js 正在运行且为最新版本。",
+      "ExternalViewerUnreachable": "无法连接到端口 {port} 上的配套服务器（{message}）。请确认 serve-viewer.js（或 start-viewer-electron.bat）正在运行。"
+    },
+    "MobileView": {
+      "openButton": "手机视图",
+      "overview": "概览",
+      "actions": "行动",
+      "abilities": "属性",
+      "saves": "豬免投骟",
+      "skills": "技能",
+      "check": "检定",
+      "initiative": "先机",
+      "speed": "速度",
+      "rollToHit": "悔击",
+      "rollDamage": "伤害",
+      "noActions": "没有可用的行动。",
+      "rolling": "正在投注…",
+      "rolled": "已投注",
+      "rolledInChat": "已在聊天记录中投注",
+      "rollFailed": "投注失败",
+      "spells": "法术",
+      "inventory": "物品",
+      "features": "特性",
+      "spellSlots": "法术位",
+      "noSpells": "没有已知法术。",
+      "notPrepared": "未准备",
+      "cast": "施放",
+      "noItems": "没有物品。",
+      "equipped": "已装备",
+      "use": "使用",
+      "noFeatures": "没有特性。",
+      "autoOpenName": "登录时自动打开手机视图",
+      "autoOpenHint": "仅对本设备生效：每次登录时直接进入你的角色卡，而不是 Foundry 的常规界面。请在你实际用来游玩的手机或浏览器上开启此选项。",
+      "forcedNoCharacter": "GM 已将你的账号设置为始终显示手机视图，但你还没有被分配角色——请联系你的 GM 分配一个。",
+      "managerButton": "管理手机视图玩家",
+      "managerTitle": "手机视图玩家",
+      "managerHint": "勾选的玩家每次登录时都会被禁用画布，并全屏只看到自己的角色卡——就像最初的纯 Foundry 视图一样，但对他们强制开启。",
+      "managerNoPlayers": "此世界中还没有非 GM 玩家。",
+      "managerNoCharacter": "未分配角色",
+      "managerSave": "保存",
+      "managerCancel": "取消",
+      "adjustHp": "调整生命值",
+      "close": "关闭"
     }
   },
-
   "CN5E": {
     "ButtonLabel": "导出角色卡 (HTML)",
     "ButtonPublish": "发布手机角色卡",
-
     "Notifications": {
       "Exporting": "正在导出 {name}...",
       "Success": "已下载: {name}",
@@ -87,7 +135,6 @@
       "PublishSuccess": "手机角色卡已发布。",
       "Error": "导出失败: {error}"
     },
-
     "Sections": {
       "Details": "详情",
       "Skills": "技能",
@@ -105,7 +152,6 @@
       "Backstory": "背景故事",
       "SpellSlots": "法术位"
     },
-
     "Labels": {
       "Species": "种族",
       "Classes": "职业",
@@ -140,7 +186,7 @@
       "Equipped": "已装备",
       "Attunement": "同调",
       "Rarity": "稀有度",
-      "Weight": "重量",
+      "Weight": "体重",
       "Price": "价格",
       "Activation": "激活",
       "Uses": "使用",
@@ -158,7 +204,6 @@
       "Subclasses": "子职",
       "Age": "年龄",
       "Height": "身高",
-      "Weight": "体重",
       "Eyes": "眼睛",
       "Skin": "肤色",
       "Hair": "发色",
@@ -200,7 +245,6 @@
       "LegendaryActions": "传奇动作",
       "LegendaryResistances": "传奇抗性"
     },
-
     "Empty": {
       "Skills": "未找到技能。",
       "Tools": "未找到工具。",
@@ -211,11 +255,9 @@
       "Biography": "暂无传记。",
       "NoImage": "无头像"
     },
-
     "Footer": {
       "Text": "CN5e 角色卡导出器"
     },
-
     "Meta": {
       "Note": "CN5e 角色卡导出器 • Foundry VTT • {time}"
     }

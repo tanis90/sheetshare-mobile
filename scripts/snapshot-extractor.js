@@ -24,7 +24,7 @@ const INLINE_ROLL_PATTERN = /\[\[\s*\/r\s+([^\]]+?)\s*\]\]/gi;
 const INLINE_COMMAND_PATTERN = /\[\[\s*\/[a-z]+\s*([^\]]*?)\s*\]\]/gi;
 let cnTranslationsPromise = null;
 
-export async function extractCharacterSnapshot(actor, { portrait = "" } = {}) {
+export async function extractCharacterSnapshot(actor, { portrait = "", includeBridgeId = false } = {}) {
   const system = actor.system ?? {};
   const details = system.details ?? {};
   const attributes = system.attributes ?? {};
@@ -49,7 +49,11 @@ export async function extractCharacterSnapshot(actor, { portrait = "" } = {}) {
     actor: {
       name: actor.name,
       type: actor.type,
-      img: normalizeAssetPath(portrait)
+      img: normalizeAssetPath(portrait),
+      // Only present when the roll bridge is enabled - lets the trusted,
+      // GM-run companion server resolve which real actor to roll for.
+      // Never used by the viewer page itself for anything else.
+      bridgeId: includeBridgeId ? actor.id : undefined
     },
     access: {
       enabled: true,

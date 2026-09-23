@@ -28,7 +28,13 @@
       "AccessModeName": "Access mode",
       "AccessModeHint": "Password mode is the safe default. External Auth writes trusted snapshots and must only be used when the viewer and assets are protected by your reverse proxy or portal authentication.",
       "AccessModePassword": "Password-protected encrypted snapshots",
-      "AccessModeExternal": "External Auth / trusted portal"
+      "AccessModeExternal": "External Auth / trusted portal",
+      "ExternalViewerEnabledName": "Use external viewer server",
+      "ExternalViewerEnabledHint": "Foundry v14.361+ blocks static HTML pages from rendering, which breaks this module's normal mobile link. Enable this if you are running the included serve-viewer.js companion server, which serves the viewer page correctly and forwards everything else to Foundry.",
+      "ExternalViewerPortName": "External viewer server port",
+      "ExternalViewerPortHint": "Must match the VIEWER_PORT the serve-viewer.js companion server is running on (default 8321).",
+      "RollBridgeEnabledName": "Enable roll bridge (experimental)",
+      "RollBridgeEnabledHint": "Sends taps on the mobile viewer's ability/save/skill/attack rolls into Foundry as real rolls that appear in chat. Requires the external viewer server to be running and this Foundry tab to stay open - it works by polling the companion server from your own GM session, no extra login or account needed. Experimental - the exact roll method used depends on your dnd5e system version."
     },
     "Manager": {
       "Intro": "Published sheets are static snapshots served by Foundry's existing web server.",
@@ -72,14 +78,56 @@
       "AccessModePassword": "Password-protected encrypted snapshots.",
       "AccessModeExternal": "External Auth enabled. Protect /modules/sheetshare-mobile/viewer and /assets/sheetshare-mobile before sharing links.",
       "Readable": "Readable: {url}",
-      "HttpStatus": "HTTP {status}: {url}"
+      "HttpStatus": "HTTP {status}: {url}",
+      "ExternalViewer": "External viewer server",
+      "ExternalViewerBadType": "Reachable, but not serving HTML (got content-type: {contentType}). Check serve-viewer.js is running the latest version.",
+      "ExternalViewerUnreachable": "Could not reach the companion server on port {port} ({message}). Make sure serve-viewer.js (or start-viewer-electron.bat) is running."
+    },
+    "MobileView": {
+      "openButton": "Mobile View",
+      "overview": "Overview",
+      "actions": "Actions",
+      "abilities": "Abilities",
+      "saves": "Saving Throws",
+      "skills": "Skills",
+      "check": "Check",
+      "initiative": "Init",
+      "speed": "Speed",
+      "rollToHit": "Attack",
+      "rollDamage": "Damage",
+      "noActions": "No actions available.",
+      "rolling": "Rolling…",
+      "rolled": "Rolled",
+      "rolledInChat": "Rolled in chat",
+      "rollFailed": "Roll failed",
+      "spells": "Spells",
+      "inventory": "Inventory",
+      "features": "Features",
+      "spellSlots": "Spell Slots",
+      "noSpells": "No spells known.",
+      "notPrepared": "not prepared",
+      "cast": "Cast",
+      "noItems": "No items.",
+      "equipped": "Equipped",
+      "use": "Use",
+      "noFeatures": "No features.",
+      "autoOpenName": "Auto-open Mobile View on login",
+      "autoOpenHint": "On this device only: skip straight to just your character sheet every time you log in, instead of Foundry's normal view. Turn this on from the phone/browser you actually use to play.",
+      "forcedNoCharacter": "The GM has set your account to always show Mobile View, but you don't have a character assigned yet - ask your GM to assign one.",
+      "managerButton": "Manage Mobile View Players",
+      "managerTitle": "Mobile View Players",
+      "managerHint": "Players checked here will have their canvas disabled and see only their character sheet, full screen, every time they log in - exactly like the old Foundry-first view, but forced on for them.",
+      "managerNoPlayers": "There are no non-GM players in this world yet.",
+      "managerNoCharacter": "no character assigned",
+      "managerSave": "Save",
+      "managerCancel": "Cancel",
+      "adjustHp": "Adjust HP",
+      "close": "Close"
     }
   },
-
   "CN5E": {
     "ButtonLabel": "Export Character Sheet (HTML)",
     "ButtonPublish": "Publish Mobile Character Sheet",
-
     "Notifications": {
       "Exporting": "Exporting {name}...",
       "Success": "Downloaded: {name}",
@@ -87,7 +135,6 @@
       "PublishSuccess": "Mobile character sheets published.",
       "Error": "Export failed: {error}"
     },
-
     "Sections": {
       "Details": "Details",
       "Skills": "Skills & Tools",
@@ -105,7 +152,6 @@
       "Backstory": "Backstory",
       "SpellSlots": "Spell Slots"
     },
-
     "Labels": {
       "Species": "Species",
       "Classes": "Classes",
@@ -158,7 +204,6 @@
       "Subclasses": "Subclasses",
       "Age": "Age",
       "Height": "Height",
-      "Weight": "Weight",
       "Eyes": "Eyes",
       "Skin": "Skin",
       "Hair": "Hair",
@@ -200,7 +245,6 @@
       "LegendaryActions": "Legendary Actions",
       "LegendaryResistances": "Legendary Resistances"
     },
-
     "Empty": {
       "Skills": "No skills found.",
       "Tools": "No tools found.",
@@ -211,11 +255,9 @@
       "Biography": "No biography available.",
       "NoImage": "No image"
     },
-
     "Footer": {
       "Text": "CN5e Character Sheet Exporter"
     },
-
     "Meta": {
       "Note": "CN5e Character Sheet Exporter • Foundry VTT • {time}"
     }

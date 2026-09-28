@@ -1,3 +1,10 @@
+> **⚠️ This repository has moved.** SheetShare Mobile is now developed and released inside the
+> [arcanedesk-fvtt-mods monorepo](https://github.com/tanis90/arcanedesk-fvtt-mods/tree/main/modules/sheetshare-mobile).
+> This standalone repository is frozen and will be archived. To install the current version, use the
+> monorepo manifest: `https://raw.githubusercontent.com/tanis90/arcanedesk-fvtt-mods/main/modules/sheetshare-mobile/module.json`
+> (or grab it from the [arcanedesk-fvtt-mods releases](https://github.com/tanis90/arcanedesk-fvtt-mods/releases)).
+> Existing installs tracking this repo's manifest will not receive updates automatically — reinstall from the new manifest.
+
 # SheetShare Mobile
 
 [中文说明](README-zh.md)

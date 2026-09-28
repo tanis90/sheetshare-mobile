@@ -1,3 +1,10 @@
+> **⚠️ 本仓库已迁移。** SheetShare Mobile 现在在
+> [arcanedesk-fvtt-mods monorepo](https://github.com/tanis90/arcanedesk-fvtt-mods/tree/main/modules/sheetshare-mobile)
+> 内开发与发布，本独立仓库已冻结并将归档。安装当前版本请使用 monorepo manifest：
+> `https://raw.githubusercontent.com/tanis90/arcanedesk-fvtt-mods/main/modules/sheetshare-mobile/module.json`
+> （或从 [arcanedesk-fvtt-mods releases](https://github.com/tanis90/arcanedesk-fvtt-mods/releases) 下载）。
+> 跟踪本仓库 manifest 的既有安装不会自动收到更新，请按新 manifest 重装。
+
 # SheetShare Mobile
 
 手机优先的 Foundry VTT 角色卡分享模块。默认使用带密码保护的加密快照；如果你有自己的门户或反向代理认证，也可以启用 External Auth 模式。

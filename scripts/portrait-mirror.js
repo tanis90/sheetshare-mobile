@@ -4,14 +4,16 @@ import {
   buildPortraitPublicPath,
   detectSafeImageType
 } from "./publish-safety.js";
+import { digestHex } from "./hash-utils.js";
 
 const MODULE_ID = "sheetshare-mobile";
 const STORAGE_ROOT_NAME = "sheetshare-mobile";
 
 /**
  * Copy actor.img into the world's SheetShare media directory using the source
- * bytes' SHA-256 digest as its filename. Unsupported or unavailable images are
- * deliberately represented as an empty portrait so the viewer uses initials.
+ * bytes' content digest as its filename (SHA-256 when WebCrypto is available,
+ * see hash-utils.js). Unsupported or unavailable images are deliberately
+ * represented as an empty portrait so the viewer uses initials.
  */
 export async function mirrorActorPortrait(actor) {
   const source = String(actor?.img ?? "").trim();
@@ -31,7 +33,7 @@ export async function mirrorActorPortrait(actor) {
     const imageType = detectSafeImageType(bytes);
     if (!imageType) throw new Error("unsupported image format (only PNG, JPEG, WEBP, and GIF are allowed)");
 
-    const digest = await sha256Hex(bytes);
+    const digest = await digestHex(bytes);
     const filename = `${digest}.${imageType.extension}`;
     await ensureDirectory(mediaStorageRoot());
     const file = new File([bytes], filename, { type: imageType.mimeType });
@@ -85,11 +87,6 @@ function assetRequestUrl(source) {
   const cleaned = source.replace(/^\/+/, "");
   if (foundry.utils.getRoute) return foundry.utils.getRoute(cleaned);
   return `${window.location.origin}/${cleaned}`;
-}
-
-async function sha256Hex(bytes) {
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
 }
 
 function mediaStorageRoot() {

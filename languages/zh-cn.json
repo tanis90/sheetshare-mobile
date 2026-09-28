@@ -6,13 +6,17 @@
     "ButtonManage": "已发布角色卡",
     "ButtonDoctor": "Doctor 检查",
     "ManagerTitle": "SheetShare Mobile",
+    "PasswordPromptTitle": "SheetShare 分享密码",
+    "ButtonCancel": "取消",
+    "ButtonClose": "关闭",
     "PasswordPrompt": "请输入 SheetShare Mobile 的整桌分享密码。它只用于本地加密导出的角色卡，不会保存。",
     "Notifications": {
       "Error": "SheetShare Mobile 失败：{error}",
       "Copied": "手机角色卡链接已复制。",
       "PasswordRequired": "需要分享密码。",
       "NotPublished": "这名角色尚未发布。",
-      "NoClipboard": "请复制这个链接：{url}"
+      "SecureContextRequired": "密码模式依赖 WebCrypto，仅在 HTTPS 或 localhost 访问下可用。请改用 External Auth 模式，或通过 HTTPS 提供 Foundry 服务。",
+      "NoClipboard": "请复制这个链接："
     },
     "Settings": {
       "AutoExportName": "自动刷新已发布角色卡",
@@ -45,6 +49,7 @@
       "Refresh": "刷新",
       "CopyLink": "复制链接",
       "Unpublish": "取消发布",
+      "UnpublishConfirm": "取消发布 {name}？已发布的快照会被替换为撤销标记，已分享的直链将立即失效。头像媒体文件会保留在磁盘上，需要手动清理。",
       "NoCharacters": "没有找到 character 类型角色。"
     },
     "Doctor": {

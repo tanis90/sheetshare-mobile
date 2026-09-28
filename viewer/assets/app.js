@@ -14,6 +14,7 @@ const VIEWER_I18N = {
     unlockSheet: "Unlock Sheet",
     missingPassword: "Enter the share password.",
     fetchMissing: "This sheet was not found. Ask the GM to publish it again and share the correct link.",
+    sheetUnpublished: "The GM unpublished this sheet and the link is no longer available.",
     unsupportedFormat: "This sheet format is not supported. Ask the GM to publish it again.",
     characterSheet: "Character Sheet",
     wrongPassword: "Wrong password, or this sheet was republished with a new password.",
@@ -144,6 +145,7 @@ const VIEWER_I18N = {
     unlockSheet: "解锁角色卡",
     missingPassword: "请输入分享密码。",
     fetchMissing: "找不到这张角色卡。请确认 GM 已发布并分享了正确链接。",
+    sheetUnpublished: "GM 已取消发布这张角色卡，链接不再可用。",
     unsupportedFormat: "角色卡格式不受支持。请让 GM 重新发布。",
     characterSheet: "角色卡",
     wrongPassword: "密码错误，或角色卡已用新密码重新发布。",
@@ -264,6 +266,7 @@ const VIEWER_I18N = {
 const PASSWORD_CACHE_PREFIX = "sheetshare-mobile:v1";
 const ENCRYPTED_SNAPSHOT_SCHEMA = "sheetshare-mobile.encrypted-snapshot.v1";
 const TRUSTED_SNAPSHOT_SCHEMA = "sheetshare-mobile.trusted-snapshot.v1";
+const REVOKED_SNAPSHOT_SCHEMA = "sheetshare-mobile.revoked-snapshot.v1";
 
 // Skill -> governing ability, fixed by the D&D 5e rules. Kept in the viewer so
 // that snapshots without a per-skill ability field still group correctly.
@@ -405,6 +408,7 @@ window.characterSheetViewer = function characterSheetViewer() {
       const response = await fetch(`${this.snapshotBase}${slug}.json?ts=${Date.now()}`, { cache: "no-store" });
       if (!response.ok) throw new Error(this.t("fetchMissing"));
       this.envelope = await response.json();
+      if (this.envelope?.schema === REVOKED_SNAPSHOT_SCHEMA) throw new Error(this.t("sheetUnpublished"));
       if (this.externalAuth) {
         if (this.envelope?.schema !== TRUSTED_SNAPSHOT_SCHEMA) {
           throw new Error(this.t("externalAuthFormatMismatch"));
@@ -488,6 +492,11 @@ window.characterSheetViewer = function characterSheetViewer() {
       const response = await fetch(`${this.snapshotBase}${slug}.json?ts=${Date.now()}`, { cache: "no-store" });
       if (!response.ok) throw new Error(this.t("readFailed"));
       this.envelope = await response.json();
+      if (this.envelope?.schema === REVOKED_SNAPSHOT_SCHEMA) {
+        const revokedError = new Error("Sheet unpublished");
+        revokedError.sheetshareUnpublished = true;
+        throw revokedError;
+      }
       if (this.externalAuth) {
         if (this.envelope?.schema !== TRUSTED_SNAPSHOT_SCHEMA) throw new Error(this.t("externalAuthFormatMismatch"));
         return this.envelope;
@@ -518,6 +527,14 @@ window.characterSheetViewer = function characterSheetViewer() {
             this.needsPassword = true;
             this.unlockError = this.t("wrongPassword");
             this.stopPolling();
+            return;
+          }
+          if (error?.sheetshareUnpublished) {
+            this.stopPolling();
+            clearCachedPassword();
+            this.selected = null;
+            this.password = "";
+            this.error = this.t("sheetUnpublished");
             return;
           }
           console.warn("Character sheet refresh failed", error);

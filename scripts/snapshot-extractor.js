@@ -5,6 +5,7 @@ import {
   formatTraitList, formatPrice, formatUses,
   formatRange, formatDuration, sortDocuments
 } from "./utils.js";
+import { digestAlgorithm, digestTextHex } from "./hash-utils.js";
 
 const MODULE_ID = "sheetshare-mobile";
 const SNAPSHOT_SCHEMA = "sheetshare-mobile.snapshot.v1";
@@ -151,9 +152,7 @@ async function hashSnapshot(snapshot) {
   delete clone.exportedAt;
   delete clone.contentHash;
   const json = stableStringify(clone);
-  const bytes = new TextEncoder().encode(json);
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return `sha256:${Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("")}`;
+  return `${digestAlgorithm()}:${await digestTextHex(json)}`;
 }
 
 function stableStringify(value) {

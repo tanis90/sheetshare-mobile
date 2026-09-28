@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 0.5.0 - 2026-09-28
+
+### Fixes
+
+- Publish successfully in External Auth mode on plain HTTP deployments: change detection and portrait naming fall back to a non-cryptographic dual-lane FNV-1a digest when WebCrypto is unavailable, and the `contentHash` prefix records which algorithm produced it (`sha256:` or `fnv1a64:`). The fallback is never used for encryption or key derivation (#2).
+- Fail with a clear "HTTPS or localhost required" message when password mode is attempted without WebCrypto, instead of crashing with `Cannot read properties of undefined (reading 'digest')` (#2).
+- Replace `window.prompt` with Foundry `DialogV2` windows for the share password prompt and the copy-link fallback, so publishing in password mode and copying links work in Electron hosts (including the official Foundry desktop client) and on plain HTTP pages (#3).
+- Make unpublishing revoke access: the snapshot file is overwritten with a revoked marker document, existing direct links stop working immediately (the viewer shows an "unpublished" notice, including on already-open tabs), and the manager asks for confirmation first (#4).
+
+### Documentation
+
+- Add an "Access modes and exposure surface" section to both READMEs covering what each mode protects, the public `_latest.json` index (random slugs are not access control), the revocation semantics of unpublish, a minimal nginx reverse-proxy example, portrait media cleanup, and how to read the Doctor warnings (#5).
+
 ## 0.4.1 - 2026-09-15
 
 ### Documentation

@@ -31,7 +31,7 @@ SheetShare Mobile 让 GM 可以从 Foundry 里的 actor 发布一张适合手机
 
 - Foundry VTT v13
 - D&D 5e system 5.3+
-- 支持 WebCrypto 的现代浏览器
+- 支持 WebCrypto 的现代浏览器（密码模式必需；External Auth 模式在纯 HTTP 下也可用）
 - 公开分享时使用 HTTPS
 
 本地 HTTP 可以用于测试，但对外分享建议使用 HTTPS。
@@ -112,6 +112,51 @@ External Auth 世界会在主 GM 进入 `ready` 后自动刷新已发布角色�
 - **Doctor 检查**：检查存储、分享页资源、访问协议和常见配置问题。
 
 ## 安全
+
+### 访问模式与暴露面
+
+两种访问模式保护的东西不同，任何一种都不能单独让已发布文件保密：
+
+| | 密码模式（默认） | External Auth 模式 |
+| --- | --- | --- |
+| 磁盘上的快照 | AES-GCM 加密（PBKDF2 + WebCrypto） | 明文 trusted 快照 |
+| 访问控制由谁保证 | 分享密码，在分享页输入 | **你的部署**——Foundry 前面的反向代理或门户 |
+| 需要安全上下文（HTTPS/localhost） | 需要，GM 端和玩家端都需要 | 不需要——纯 HTTP 下也能发布 |
+
+分享链接前，每位 GM 都应该知道：
+
+1. **`_latest.json` 是公开索引。** 任何能访问你世界地址的人都可以请求 `assets/sheetshare-mobile/<world>/_latest.json`，读出所有已发布角色的 `name` 和 `slug`。随机 slug 只是稳定标识符，**不是访问控制**：拿到 slug 就能拼出 viewer 链接。模块自己的分享页不使用这个索引（分享链接直接指向 `<slug>.json`）；它只为外部工具存在，应视为公开数据。
+2. **External Auth 快照是明文。** 没有外层认证时，`_latest.json` 加上快照直链意味着"任何知道服务器地址的人都能枚举并读取所有已发布角色卡"。请只在反向代理或门户之后使用该模式。
+3. **取消发布即撤销链接。** 从 v0.5.0 起，取消发布会用撤销标记文档替换快照文件，已分享的直链立即失效（分享页会显示"已取消发布"提示）。`media/` 下的头像文件按内容寻址、保留在磁盘上；Foundry 13 没有删除数据文件的客户端 API，需要时可手动清理（见下）。
+4. **删除已发布角色不会撤销其链接。** 删除角色会移除其 flags，但快照文件仍在被提供。请先取消发布，再删除角色。
+5. **密码模式需要 WebCrypto**，浏览器只在安全上下文中提供它。在局域网 IP 的纯 HTTP 下，密码模式发布会明确报"需要 HTTPS 或 localhost"。External Auth 模式不受影响：它的哈希（变更检测、头像命名）会自动降级为非加密摘要，绝不用于加密。
+
+### 反向代理最小示例
+
+External Auth 模式下，请把分享页和快照资源一起保护起来。以下前缀之外的路径（Foundry 本体）可以走你正常的认证：
+
+```nginx
+# 为手机分享页和快照资源启用认证
+location ~ ^/(modules/sheetshare-mobile/(viewer/)?|assets/sheetshare-mobile/) {
+    auth_basic "SheetShare Mobile";
+    auth_basic_user_file /etc/nginx/foundry_sheetshare.htpasswd;
+    proxy_pass http://127.0.0.1:30000;
+    proxy_set_header Host $host;
+}
+```
+
+玩家在分享页加载前先完成门户的用户名/密码认证。
+
+### 清理头像媒体文件
+
+头像文件存放在 `Data/assets/sheetshare-mobile/<world>/media/<digest>.<ext>`。要找出不再被任何已发布角色引用的文件，可以把目录列表与 `assets/sheetshare-mobile/<world>/_latest.json` 里的 `portrait` 值对比，在 Foundry 停止时删除多余的文件。仍在列表中的文件不要删——它们是已发布角色卡的当前头像。
+
+### 如何解读 Doctor 检查项
+
+- **访问协议 / HTTP 警告**：Foundry 页面通过纯 HTTP 提供。本地测试没问题；公开分享应使用 HTTPS（密码模式硬性要求，见上）。
+- **访问模式 / External Auth 警告**：提醒 trusted 快照在没有自行认证保护 `/modules/sheetshare-mobile/viewer` 和 `/assets/sheetshare-mobile` 时是不设防的。出现这条警告不代表保护已存在——请自行验证，例如用无门户凭据的隐私浏览器窗口打开一条分享链接试试。
+
+### 密码处理细节
 
 每张已发布角色卡都会保存为加密静态快照。密码不会放在 URL 里，也不会由分享页发送给服务器。直接打开 JSON 快照不会看到明文角色卡内容。
 

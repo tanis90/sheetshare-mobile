@@ -33,7 +33,7 @@ Character names, item names, spell names, and descriptions come from your Foundr
 
 - Foundry VTT v13
 - D&D 5e system 5.3+
-- A modern browser with WebCrypto support
+- A modern browser with WebCrypto support (required for password mode; External Auth mode also works over plain HTTP)
 - HTTPS for public sharing
 
 Local HTTP works for testing, but public links should be served over HTTPS.
@@ -114,6 +114,51 @@ The settings page also exposes:
 - **Doctor**: check storage, viewer assets, protocol, and common setup problems.
 
 ## Security
+
+### Access modes and exposure surface
+
+The two access modes protect different things, and neither makes the published files secret on its own:
+
+| | Password mode (default) | External Auth mode |
+| --- | --- | --- |
+| Snapshot on disk | AES-GCM encrypted (PBKDF2 + WebCrypto) | Plaintext trusted snapshot |
+| What enforces access | The share password, entered in the viewer | **Your deployment** — a reverse proxy or portal in front of Foundry |
+| Requires secure context (HTTPS/localhost) | Yes, on both GM and player side | No — publishing itself works over plain HTTP |
+
+Things every GM should know before sharing links:
+
+1. **`_latest.json` is a public index.** Anyone who can reach your world URL can request `assets/sheetshare-mobile/<world>/_latest.json` and read every published character's `name` and `slug`. The random slug is a stable identifier, **not** access control: with the slug anyone can assemble the viewer link. The module's own viewer does not use this index (share links point directly at `<slug>.json`); it exists for external tooling, so treat it as published data.
+2. **External Auth snapshots are plaintext.** Without an outer auth layer, `_latest.json` plus direct snapshot URLs means "anyone who knows the server address can enumerate and read every published sheet." Only use this mode behind a reverse proxy or portal.
+3. **Unpublishing revokes links.** Since v0.5.0, unpublishing replaces the snapshot file with a revoked marker document, so existing direct links immediately stop serving the character (the viewer shows an "unpublished" notice). Portrait files under `media/` are content-addressed and remain on disk; Foundry 13 has no client API for deleting data files, so clean them up manually if needed (see below).
+4. **Deleting a published actor does not revoke its link.** Deleting the actor removes its flags but leaves the snapshot file served. Unpublish first, then delete the actor.
+5. **Password mode needs WebCrypto**, which browsers only expose in secure contexts. Over plain HTTP on a LAN IP, publishing in password mode fails with a clear "HTTPS or localhost required" message. External Auth mode keeps working: its hashing (change detection, portrait naming) automatically falls back to a non-cryptographic digest that is never used for encryption.
+
+### Minimal reverse-proxy example
+
+For External Auth mode, protect the viewer and the snapshot assets together. Anything outside these prefixes (the Foundry app itself) can use your normal authentication:
+
+```nginx
+# requires auth for the mobile viewer and its snapshot assets
+location ~ ^/(modules/sheetshare-mobile/(viewer/)?|assets/sheetshare-mobile/) {
+    auth_basic "SheetShare Mobile";
+    auth_basic_user_file /etc/nginx/foundry_sheetshare.htpasswd;
+    proxy_pass http://127.0.0.1:30000;
+    proxy_set_header Host $host;
+}
+```
+
+Players then authenticate with the portal user/password before the viewer loads.
+
+### Cleaning up portrait media
+
+Portrait files live at `Data/assets/sheetshare-mobile/<world>/media/<digest>.<ext>`. To find files no longer referenced by any published character, compare the directory listing against the `portrait` values in `assets/sheetshare-mobile/<world>/_latest.json` and delete the leftovers while Foundry is stopped. Do not delete files that are still listed — they are the current portraits of published sheets.
+
+### How to read the Doctor checks
+
+- **Protocol / HTTP warning**: the Foundry page is served over plain HTTP. Fine for local testing; public sharing should be HTTPS (and password mode requires it — see above).
+- **Access mode / External Auth warning**: a reminder that trusted snapshots are unprotected unless `/modules/sheetshare-mobile/viewer` and `/assets/sheetshare-mobile` sit behind your own authentication. The warning appearing does not mean the protection exists — verify it yourself, for example by opening a share link in a private browser window without portal credentials.
+
+### Password handling details
 
 Each published character sheet is stored as an encrypted static snapshot. The password is not placed in the URL and is not sent to the server by the viewer. Directly opening the JSON snapshot does not reveal the character sheet.
 

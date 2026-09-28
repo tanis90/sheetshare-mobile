@@ -6,13 +6,17 @@
     "ButtonManage": "Published Sheets",
     "ButtonDoctor": "Doctor",
     "ManagerTitle": "SheetShare Mobile",
+    "PasswordPromptTitle": "SheetShare Share Password",
+    "ButtonCancel": "Cancel",
+    "ButtonClose": "Close",
     "PasswordPrompt": "Enter the table share password for SheetShare Mobile. It is used locally to encrypt the exported sheet and is not saved.",
     "Notifications": {
       "Error": "SheetShare Mobile failed: {error}",
       "Copied": "Mobile sheet link copied.",
       "PasswordRequired": "A share password is required.",
       "NotPublished": "This character is not published.",
-      "NoClipboard": "Copy this link: {url}"
+      "SecureContextRequired": "Password mode requires WebCrypto, which is only available over HTTPS or localhost. Switch to External Auth mode or serve Foundry over HTTPS.",
+      "NoClipboard": "Copy this link:"
     },
     "Settings": {
       "AutoExportName": "Auto-refresh published sheets",
@@ -45,6 +49,7 @@
       "Refresh": "Refresh",
       "CopyLink": "Copy Link",
       "Unpublish": "Unpublish",
+      "UnpublishConfirm": "Unpublish {name}? The published snapshot is replaced with a revoked marker, so existing share links stop working immediately. Portrait media files remain on disk until cleaned up manually.",
       "NoCharacters": "No character actors found."
     },
     "Doctor": {

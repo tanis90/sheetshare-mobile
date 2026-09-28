@@ -2,6 +2,7 @@ import { extractCharacterSnapshot } from "./snapshot-extractor.js";
 import { legacyActorKeyAlias, normalizeActorKeyPart, resolveActorKey } from "./actor-key.js";
 import { mirrorActorPortrait } from "./portrait-mirror.js";
 import { assertUniquePublishedIdentities } from "./publish-safety.js";
+import { hasWebCrypto } from "./hash-utils.js";
 
 export const MODULE_ID = "sheetshare-mobile";
 export const STORAGE_ROOT_NAME = "sheetshare-mobile";
@@ -16,6 +17,7 @@ const VIEWER_LANGUAGE_AUTO = "auto";
 const VIEWER_LANGUAGE_FOUNDRY = "foundry";
 const ACCESS_MODE_PASSWORD = "password";
 const ACCESS_MODE_EXTERNAL = "externalAuth";
+const REVOKED_SNAPSHOT_SCHEMA = "sheetshare-mobile.revoked-snapshot.v1";
 const LATEST_INDEX_FILENAME = "_latest.json";
 const LATEST_INDEX_SCHEMA = "sheetshare-mobile.latest-index.v1";
 const pendingExports = new Map();
@@ -143,6 +145,11 @@ export async function setActorPublished(actor, enabled) {
   await actor.setFlag(MODULE_ID, PUBLISH_FLAG, next);
   if (!enabled) {
     await ensureExportDirectories();
+    // Foundry 13 exposes no client API for deleting data files, so revoking a
+    // share overwrites the snapshot with a tombstone document: the direct link
+    // stops serving the character even though the file entry itself remains.
+    await uploadJson(storageRoot(), `${slug}.json`, buildRevokedSnapshotDocument(slug));
+    lastHashes.delete(actor.id);
     await uploadLatestIndex();
   }
   return next;
@@ -167,6 +174,7 @@ export async function exportActorSnapshot(actor, { reason = "manual", password =
   const accessMode = sheetAccessMode();
   let sharePassword = "";
   if (accessMode === ACCESS_MODE_PASSWORD) {
+    if (!hasWebCrypto()) throw new Error(game.i18n.localize("SSM.Notifications.SecureContextRequired"));
     if (password) window[SESSION_PASSWORD_KEY] = password;
     const promptIfMissing = reason === "manual";
     sharePassword = password || await getSessionPassword({ promptIfMissing });
@@ -269,9 +277,36 @@ export async function copyActorLink(actor) {
   try {
     await navigator.clipboard.writeText(url);
   } catch {
-    window.prompt(game.i18n.localize("SSM.Notifications.NoClipboard"), url);
+    // navigator.clipboard is undefined on plain HTTP pages and window.prompt
+    // throws in Electron hosts, so surface the link in a readonly dialog.
+    await showLinkFallbackDialog(url);
   }
   return url;
+}
+
+function showLinkFallbackDialog(url) {
+  return foundry.applications.api.DialogV2.wait({
+    window: { title: game.i18n.localize("SSM.ButtonCopyLink") },
+    modal: true,
+    content: `<div class="form-group">
+        <label>${escapeHtml(game.i18n.localize("SSM.Notifications.NoClipboard"))}</label>
+        <div class="form-fields"><input type="text" name="shareUrl" value="${escapeHtml(url)}" readonly></div>
+      </div>`,
+    buttons: [{ action: "close", label: "SSM.ButtonClose", default: true }],
+    render: (event, dialog) => dialog.element.querySelector('[name="shareUrl"]')?.select()
+  });
+}
+
+// Unpublishing revokes the share: the snapshot file is replaced by a tombstone
+// so existing direct links stop working. Confirm before doing it.
+function confirmUnpublishDialog(actor) {
+  return foundry.applications.api.DialogV2.confirm({
+    window: { title: game.i18n.localize("SSM.Manager.Unpublish") },
+    modal: true,
+    content: `<p>${escapeHtml(game.i18n.format("SSM.Manager.UnpublishConfirm", { name: actor.name }))}</p>`,
+    yes: { label: "SSM.Manager.Unpublish" },
+    no: { label: "SSM.ButtonCancel" }
+  }).then(result => result === true);
 }
 
 export async function runStorageSelfTest() {
@@ -389,10 +424,34 @@ async function getSessionPassword({ promptIfMissing = false } = {}) {
   if (existing) return existing;
   if (!promptIfMissing) return "";
 
-  const password = window.prompt(game.i18n.localize("SSM.PasswordPrompt"));
+  const password = await promptSharePasswordDialog();
   if (!password) return "";
   window[SESSION_PASSWORD_KEY] = password;
   return password;
+}
+
+// Electron hosts — including the official Foundry desktop client — do not
+// implement window.prompt, so password capture renders as a Foundry dialog.
+// Resolves with the entered password, or "" when cancelled/dismissed.
+function promptSharePasswordDialog() {
+  return foundry.applications.api.DialogV2.wait({
+    window: { title: game.i18n.localize("SSM.PasswordPromptTitle") },
+    modal: true,
+    content: `<div class="form-group">
+        <label>${escapeHtml(game.i18n.localize("SSM.PasswordPrompt"))}</label>
+        <div class="form-fields"><input type="password" name="sharePassword" autocomplete="new-password"></div>
+      </div>`,
+    buttons: [
+      {
+        action: "publish",
+        label: "SSM.ButtonPublish",
+        default: true,
+        callback: (event, button) => button.form.elements.sharePassword.value
+      },
+      { action: "cancel", label: "SSM.ButtonCancel", callback: () => "" }
+    ],
+    render: (event, dialog) => dialog.element.querySelector('[name="sharePassword"]')?.focus()
+  }).then(result => (typeof result === "string" ? result : ""));
 }
 
 async function ensureExportDirectories() {
@@ -551,6 +610,16 @@ function trustedSnapshot(snapshot, slug) {
       foundry: normalizeViewerLanguage(game.i18n?.lang),
       url: shareUrlLanguage()
     }
+  };
+}
+
+function buildRevokedSnapshotDocument(slug) {
+  return {
+    schema: REVOKED_SNAPSHOT_SCHEMA,
+    moduleVersion: game.modules.get(MODULE_ID)?.version || "0.1.0",
+    worldId: game.world.id,
+    slug,
+    revokedAt: new Date().toISOString()
   };
 }
 
@@ -763,6 +832,7 @@ class PublishedSheetsApp extends Application {
         } else if (action === "copy") {
           await copyActorLink(actor);
         } else if (action === "unpublish") {
+          if (!(await confirmUnpublishDialog(actor))) return;
           await setActorPublished(actor, false);
           this.render(false);
         }

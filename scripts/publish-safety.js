@@ -32,7 +32,9 @@ export function buildPortraitPublicPath(worldId, digestHex, extension) {
   const digest = String(digestHex ?? "").trim().toLowerCase();
   const normalizedExtension = String(extension ?? "").trim().toLowerCase();
   if (!world) throw new Error("Cannot build a SheetShare portrait path without a world id.");
-  if (!/^[a-f0-9]{64}$/.test(digest)) throw new Error("SheetShare portrait digest must be a 64-character SHA-256 hex value.");
+  if (!/^[a-f0-9]{16}$|^[a-f0-9]{64}$/.test(digest)) {
+    throw new Error("SheetShare portrait digest must be a 16 or 64 character hex value.");
+  }
   if (!Object.hasOwn(SAFE_IMAGE_TYPES, normalizedExtension)) {
     throw new Error(`Unsupported SheetShare portrait extension: ${normalizedExtension || "(empty)"}.`);
   }

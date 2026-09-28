@@ -36,8 +36,13 @@ test("builds the exact world-scoped portrait schema", () => {
     buildPortraitPublicPath("COS 世界", digest, "png"),
     `assets/sheetshare-mobile/COS%20%E4%B8%96%E7%95%8C/media/${digest}.png`
   );
+  assert.equal(
+    buildPortraitPublicPath("COS", "b".repeat(16), "jpg"),
+    `assets/sheetshare-mobile/COS/media/${"b".repeat(16)}.jpg`
+  );
   assert.throws(() => buildPortraitPublicPath("COS", digest, "svg"), /unsupported/i);
-  assert.throws(() => buildPortraitPublicPath("COS", "abc", "png"), /SHA-256/i);
+  assert.throws(() => buildPortraitPublicPath("COS", "abc", "png"), /hex/i);
+  assert.throws(() => buildPortraitPublicPath("COS", "c".repeat(32), "png"), /hex/i);
 });
 
 test("allows only signature-verified raster portrait formats", () => {
@@ -67,4 +72,31 @@ test("runtime wires clone cleanup, ready refresh, and mirrored portrait fields",
   assert.doesNotMatch(exporterSource, /\bslugify\(actor\.name\)/);
   assert.match(exporterSource, /portrait: publish\.portrait \|\| ""/);
   assert.match(extractorSource, /extractCharacterSnapshot\(actor, \{ portrait = "" \}/);
+});
+
+test("never calls window.prompt and gates password mode on WebCrypto", async () => {
+  const [exporterSource, extractorSource, portraitSource] = await Promise.all([
+    readFile(new URL("../scripts/snapshot-exporter.js", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/snapshot-extractor.js", import.meta.url), "utf8"),
+    readFile(new URL("../scripts/portrait-mirror.js", import.meta.url), "utf8")
+  ]);
+  assert.doesNotMatch(exporterSource, /window\.prompt\s*\(/);
+  assert.match(exporterSource, /foundry\.applications\.api\.DialogV2\.wait/);
+  assert.match(exporterSource, /hasWebCrypto\(\)\) throw new Error\(game\.i18n\.localize\("SSM\.Notifications\.SecureContextRequired"\)\)/);
+  assert.match(extractorSource, /from "\.\/hash-utils\.js"/);
+  assert.doesNotMatch(extractorSource, /crypto\.subtle/);
+  assert.doesNotMatch(portraitSource, /crypto\.subtle/);
+});
+
+test("unpublishing revokes the snapshot file instead of only delisting it", async () => {
+  const [exporterSource, viewerSource] = await Promise.all([
+    readFile(new URL("../scripts/snapshot-exporter.js", import.meta.url), "utf8"),
+    readFile(new URL("../viewer/assets/app.js", import.meta.url), "utf8")
+  ]);
+  assert.match(exporterSource, /REVOKED_SNAPSHOT_SCHEMA = "sheetshare-mobile\.revoked-snapshot\.v1"/);
+  assert.match(exporterSource, /uploadJson\(storageRoot\(\), `\$\{slug\}\.json`, buildRevokedSnapshotDocument\(slug\)\)/);
+  assert.match(exporterSource, /lastHashes\.delete\(actor\.id\)/);
+  assert.match(exporterSource, /confirmUnpublishDialog\(actor\)/);
+  assert.match(viewerSource, /REVOKED_SNAPSHOT_SCHEMA/);
+  assert.match(viewerSource, /sheetshareUnpublished/);
 });
